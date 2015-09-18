@@ -19,7 +19,7 @@ public class NotificacaoActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(NotificacaoActivity.this, DeviceControlActivity.class);
-				intent.putExtra("onOkClick","onOkClick");
+				intent.putExtra(Constantes.NOTIFICACAO_ACTION_OK,Constantes.NOTIFICACAO_ACTION_OK);
 				startActivity(intent);
 				
 			}

@@ -49,8 +49,7 @@ public class BluetoothLeService extends Service {
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
-    private boolean enviaAlertas = true;
-    private Intent mServiceIntent;
+    private boolean isDesconexaoIntencional = true;
     private SistemaDAO sistemaDAO;
     private Notificacao2 notificacao2;
     
@@ -68,6 +67,8 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED_DIALOGO =
+            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED_DIALOGO";
     public final static String ACTION_GATT_SERVICES_DISCOVERED =
             "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE =
@@ -79,27 +80,6 @@ public class BluetoothLeService extends Service {
             UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
     
     
-    public void cancelarNotificacao(int id){
-    	notificacao2.cancelarNotificacao(id);
-    }
-    
-    public boolean conectarAssimQueEstiverDisponivel(String mDeviceAddress){
-    	if(Boolean.getBoolean(sistemaDAO.getValor(Constantes.NOTIFICACAO_ATIVO))){
-    		
-    		cancelarNotificacao(Constantes.NOTIFICATION_ID);
-    	}
-    	while(!connect(mDeviceAddress)){
-    		try {
-				Thread.sleep(TRINTA_SEGUNDOS);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-    	}
-    	return true;
-    	
-    }
-    
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -107,6 +87,11 @@ public class BluetoothLeService extends Service {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
+
+            	if(Boolean.valueOf(sistemaDAO.getValor(Constantes.NOTIFICACAO_ATIVO))){
+            		//CANCELA A NOTIFICA플O ENVIADA
+            		notificacao2.cancelarNotificacao(Constantes.NOTIFICATION_ID);
+            	}
             	
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;
@@ -116,15 +101,23 @@ public class BluetoothLeService extends Service {
                 Log.i(TAG, "Attempting to start service discovery:" +
                         mBluetoothGatt.discoverServices());
                 
-                if(isNotificacaoVisivel()){
-                	//CANCELA A NOTIFICA플O ENVIADA
-                	notificacao2.cancelarNotificacao(Constantes.NOTIFICATION_ID);
-                }
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-
-            	if (isEnviaAlertas()) {
-            		
+            	setDesconexaoIntencional(Boolean.TRUE);
+            	
+            	
+            	if(VisibilidadeManager.isMainActivityVisible()){
+            		//MOSTRA O DIALOGO
+            		intentAction = ACTION_GATT_DISCONNECTED_DIALOGO;
+            	} else {
+            		intentAction = ACTION_GATT_DISCONNECTED;
+            	}
+            	
+            	mConnectionState = STATE_DISCONNECTED;
+            	Log.i(TAG, "Disconnected from GATT server.");
+            	broadcastUpdate(intentAction);
+            	
+            	if (isDesconexaoIntencional()) {
             		//ENVIA AS NOTIFICA합ES
             		if(!enviarNotificacao()){
             			//AGORA FUDEU...N홒 TEVE RESPOSTA EM NENHUMA DAS NOTIFICA합ES
@@ -136,14 +129,7 @@ public class BluetoothLeService extends Service {
             			Toast.makeText(getApplicationContext(), "MyBaby! Ainda desconectado! FUDEU!!!!!", Toast.LENGTH_LONG);
             			//FUDEU
             		}
-
             	}
-                
-                setEnviaAlertas(true);
-                intentAction = ACTION_GATT_DISCONNECTED;
-                mConnectionState = STATE_DISCONNECTED;
-                Log.i(TAG, "Disconnected from GATT server.");
-                broadcastUpdate(intentAction);
             }
         }
         
@@ -178,16 +164,13 @@ public class BluetoothLeService extends Service {
     
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
+        
         sendBroadcast(intent);
     }
-    
-    private boolean isNotificacaoVisivel(){
-    	return Boolean.getBoolean(sistemaDAO.getValor(Constantes.NOTIFICACAO_ATIVO));
-    }
 
-    private void broadcastUpdate(final String action,
-                                 final BluetoothGattCharacteristic characteristic) {
-        final Intent intent = new Intent(action);
+    private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
+        
+    	final Intent intent = new Intent(action);
 
         // This is special handling for the Heart Rate Measurement profile.  Data parsing is
         // carried out as per profile specifications:
@@ -246,6 +229,13 @@ public class BluetoothLeService extends Service {
      * @return Return true if the initialization is successful.
      */
     public boolean initialize() {
+    	//CANCELANDO A NOTIFICA플O CASO ESTEJA ATIVO
+    	if(Boolean.valueOf(sistemaDAO.getValor(Constantes.NOTIFICACAO_ATIVO))){
+    		//CANCELA A NOTIFICA플O ENVIADA
+    		notificacao2.cancelarNotificacao(Constantes.NOTIFICATION_ID);
+    	}
+    	
+    	
         // For API level 18 and above, get a reference to BluetoothAdapter through
         // BluetoothManager.
         if (mBluetoothManager == null) {
@@ -282,8 +272,7 @@ public class BluetoothLeService extends Service {
         }
 
         // Previously connected device.  Try to reconnect.
-        if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
-                && mBluetoothGatt != null) {
+        if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress) && mBluetoothGatt != null) {
             Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
             if (mBluetoothGatt.connect()) {
                 mConnectionState = STATE_CONNECTING;
@@ -300,7 +289,7 @@ public class BluetoothLeService extends Service {
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
-        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        mBluetoothGatt = device.connectGatt(this, true, mGattCallback);
         Log.d(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
@@ -314,7 +303,7 @@ public class BluetoothLeService extends Service {
      * callback.
      */
     public void disconnect() {
-    	setEnviaAlertas(false);
+    	setDesconexaoIntencional(Boolean.FALSE);
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
@@ -382,13 +371,13 @@ public class BluetoothLeService extends Service {
 
         return mBluetoothGatt.getServices();
     }
+
+	public boolean isDesconexaoIntencional() {
+		return isDesconexaoIntencional;
+	}
+
+	public void setDesconexaoIntencional(boolean isDesconexaoIntencional) {
+		this.isDesconexaoIntencional = isDesconexaoIntencional;
+	}
     
-    public boolean isEnviaAlertas() {
-		return enviaAlertas;
-	}
-
-	public void setEnviaAlertas(boolean enviaAlertas) {
-		this.enviaAlertas = enviaAlertas;
-	}
-
 }

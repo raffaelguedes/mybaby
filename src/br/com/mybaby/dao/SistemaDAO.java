@@ -21,9 +21,8 @@ public class SistemaDAO extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase database) {
 		String ddl = "CREATE TABLE " + TABELA + " (chave TEXT PRIMARY KEY NOT NULL, valor TEXT);";
 		database.execSQL(ddl);
-		String insert = "INSERT INTO " + TABELA + " (chave, valor) values('" + Constantes.NOTIFICACAO_ENVIO + "', 'true');" +
-				"INSERT INTO " + TABELA + " (chave, valor) values('" + Constantes.NOTIFICACAO_ATIVO + "', 'false');";
-		database.execSQL(insert);
+		database.execSQL("INSERT INTO " + TABELA + " (chave, valor) values('" + Constantes.NOTIFICACAO_ENVIO + "', 'true');");
+		database.execSQL("INSERT INTO " + TABELA + " (chave, valor) values('" + Constantes.NOTIFICACAO_ATIVO + "', 'false');");
 	}
 
 	@Override
@@ -57,7 +56,7 @@ public class SistemaDAO extends SQLiteOpenHelper {
 		
 		Cursor cursor = getReadableDatabase().rawQuery(sql, args);
 		
-		String retorno = "";
+		String retorno = null;
 		while(cursor.moveToNext()){
 			retorno = cursor.getString(cursor.getColumnIndex("valor"));
 			

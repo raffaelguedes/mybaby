@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -37,9 +38,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 import br.com.mybaby.dao.SistemaDAO;
 
 /**
@@ -55,6 +56,8 @@ public class DeviceControlActivity extends Activity {
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
     public static final long TIMEOUT_DIALOGO = 1000*30; //1000 = 1 SEGUNDO
 
+    private ImageView imagemStatus;
+    private TextView mConnectionExplain;
     private TextView mConnectionState;
     private TextView mDataField;
     private String mDeviceName;
@@ -63,10 +66,9 @@ public class DeviceControlActivity extends Activity {
     private BluetoothLeService mBluetoothLeService;
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
     private boolean mConnected = false;
-    private boolean enviaAlertas;
     private BluetoothGattCharacteristic mNotifyCharacteristic;
-    private SistemaDAO sistemaDAO = new SistemaDAO(this);
-
+    private SistemaDAO sistemaDAO;
+    
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
 
@@ -80,9 +82,10 @@ public class DeviceControlActivity extends Activity {
                 Log.e(TAG, "Unable to initialize Bluetooth");
                 finish();
             }
+            
             // Automatically connects to the device upon successful start-up initialization.
             mBluetoothLeService.connect(mDeviceAddress);
-            //mBluetoothLeService.conectarAssimQueEstiverDisponivel(mDeviceAddress);
+
         }
 
         @Override
@@ -102,39 +105,40 @@ public class DeviceControlActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                mConnected = true;
-                updateConnectionState(R.string.connected);
-                invalidateOptionsMenu();
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-            	mConnected = false;
-                updateConnectionState(R.string.disconnected);
-                invalidateOptionsMenu();
-                clearUI();
 
-                if(enviaAlertas){
+            	imagemStatus.setImageResource(R.drawable.aguardando);
+            	mConnected = true;
+                updateConnectionState(R.string.aguardando);
+                invalidateOptionsMenu();
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action) || BluetoothLeService.ACTION_GATT_DISCONNECTED_DIALOGO.equals(action)) {
+            	
+            	mConnected = false;
+            	imagemStatus.setImageResource(R.drawable.aguardando);
+                updateConnectionState(R.string.aguardando);
+                mConnectionExplain.setVisibility(View.GONE);
+            	mConnectionExplain.setText(R.string.aguardando_explain);
+                
+                invalidateOptionsMenu();
+
+                if(BluetoothLeService.ACTION_GATT_DISCONNECTED_DIALOGO.equals(action)){
                 	mostrarDialogo();
                 }
-                enviaAlertas = true;
                 
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 // Show all the supported services and characteristics on the user interface.
-                displayGattServices(mBluetoothLeService.getSupportedGattServices());
+            	updateConnectionState(R.string.conectado);
+            	imagemStatus.setImageResource(R.drawable.conectado);
+                //displayGattServices(mBluetoothLeService.getSupportedGattServices());
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+                //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             }
         }
     };
       
-    //QUANDO É CICADO NO OK DO DIALOGO
     public void onOkClickDialogo(){
+    	
     	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE ALERTAS
-    	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, "false");
-
-    	//CANCELA A NOTIFICAÇÃO ENVIADA
-//    	Intent intent = new Intent(getApplicationContext(), Notificacao.class);
-//    	intent.setAction(Constantes.NOTIFICACAO_CANCEL);
-//    	startService(intent);
-    	//mBluetoothLeService.cancelarNotificacao();
+    	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.FALSE.toString());
 
     	//MANDA O APP PARA BACKGROUND
 //    	Intent intentGoBackground = new Intent();
@@ -203,69 +207,72 @@ public class DeviceControlActivity extends Activity {
         
         sistemaDAO = new SistemaDAO(this);
         
-        //BOOLEANO USADO NA CAIXA DE DIALOGO
-        enviaAlertas = true;
-        
         final Intent intent = getIntent();
         
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
+        String dispositivoNomeBase = sistemaDAO.getValor(Constantes.DISPOSITIVO_NOME);
+        String dispositivoEnderecoBase = sistemaDAO.getValor(Constantes.DISPOSITIVO_ENDERECO);
         
+        imagemStatus = (ImageView) findViewById(R.id.imagemStatus);
         ((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
-        mGattServicesList = (ExpandableListView) findViewById(R.id.gatt_services_list);
-        mGattServicesList.setOnChildClickListener(servicesListClickListner);
+        //mGattServicesList = (ExpandableListView) findViewById(R.id.gatt_services_list);
+        //mGattServicesList.setOnChildClickListener(servicesListClickListner);
         mConnectionState = (TextView) findViewById(R.id.connection_state);
-        mDataField = (TextView) findViewById(R.id.data_value);
+        mConnectionExplain = (TextView) findViewById(R.id.connection_explain);
+        //mDataField = (TextView) findViewById(R.id.data_value);
 
-        getActionBar().setTitle(mDeviceName);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-        
         if(mDeviceName != null && mDeviceAddress != null ){
         	//SALVO O NOME E ENDERECO DO DISPOSITIVO PARA TENTAR CONECTAR AUTOMATICO
         	//SALVA O NOME DO DISPOSITIVO
-        	if(sistemaDAO.getValor(Constantes.DISPOSITIVO_NOME) != null){
+        	if(dispositivoNomeBase != null && !dispositivoNomeBase.equals(mDeviceName)){
         		sistemaDAO.update(Constantes.DISPOSITIVO_NOME, mDeviceName);
-        	}else{
+        	}else if (dispositivoNomeBase == null) {
         		sistemaDAO.inserir(Constantes.DISPOSITIVO_NOME, mDeviceName);
         	}
         	
         	//SALVA OS DADOS DO ENDERECO DO DISPOSITIVO
-        	if(sistemaDAO.getValor(Constantes.DISPOSITIVO_ENDERECO) != null){
+        	if(dispositivoEnderecoBase != null && !dispositivoEnderecoBase.equals(mDeviceAddress)){
         		sistemaDAO.update(Constantes.DISPOSITIVO_ENDERECO, mDeviceAddress);
-        	}else{
+        	}else if (dispositivoEnderecoBase == null){
         		sistemaDAO.inserir(Constantes.DISPOSITIVO_ENDERECO, mDeviceAddress);
         	}
         	
+        } else {
+        	mDeviceName = dispositivoNomeBase;
+        	mDeviceAddress = dispositivoEnderecoBase;
         }
         
-        String onOkClick = intent.getStringExtra("onOkClick");
+        String onOkClick = intent.getStringExtra(Constantes.NOTIFICACAO_ACTION_OK);
         if(onOkClick != null && onOkClick != ""){
-//        	Intent intentGoBackground = new Intent();
-//        	intentGoBackground.setAction(Intent.ACTION_MAIN);
-//        	intentGoBackground.addCategory(Intent.CATEGORY_HOME);
-//        	this.startActivity(intentGoBackground);
         	
-
+        	mostrarDialogo();
+        	
         	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE NOTIFICAÇÕES
         	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.FALSE.toString());
         	
-        	Toast.makeText(this, "MyBaby! Aguardando nova conexão!", Toast.LENGTH_SHORT).show();
+        	updateConnectionState(R.string.aguardando);
+        	imagemStatus.setImageResource(R.drawable.aguardando);
+        	mConnectionExplain.setVisibility(View.GONE);
+        	mConnectionExplain.setText(R.string.aguardando_explain);
         	
-        	final Intent intentConexao = new Intent(this, BluetoothLeService.class);
-            intentConexao.putExtra("mDeviceAddress", mDeviceAddress);
-            startService(intentConexao);
-        	
+        } else {
+        	//ALTERA STATUS NOTIFICAÇÃO ENVIO PARA TRUE
+    		sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
         }
-
         
+        getActionBar().setTitle(mDeviceName);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        VisibilidadeManager.setMainActivityVisible(Boolean.TRUE);
         
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         if (mBluetoothLeService != null) {
@@ -277,6 +284,9 @@ public class DeviceControlActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        
+        VisibilidadeManager.setMainActivityVisible(Boolean.FALSE);
+        
         unregisterReceiver(mGattUpdateReceiver);
     }
 
@@ -307,7 +317,6 @@ public class DeviceControlActivity extends Activity {
                 mBluetoothLeService.connect(mDeviceAddress);
                 return true;
             case R.id.menu_disconnect:
-            	enviaAlertas = false;
                 mBluetoothLeService.disconnect();
                 return true;
             case android.R.id.home:
@@ -395,6 +404,8 @@ public class DeviceControlActivity extends Activity {
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED_DIALOGO);
+        
         return intentFilter;
     }
 }

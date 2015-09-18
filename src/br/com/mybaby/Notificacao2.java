@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import br.com.mybaby.dao.SistemaDAO;
 
@@ -32,33 +31,38 @@ public class Notificacao2 {
 	public void cancelarNotificacao(int idNotificacao){
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.cancel(idNotificacao);
+		
+		
+		sistemaDAO.update(Constantes.NOTIFICACAO_ATIVO, Boolean.FALSE.toString());
 
 	}
 
 	public boolean enviarNotificacao(){
+		
 		builder = new NotificationCompat.Builder(context)
-			.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-			.setSmallIcon(R.drawable.mybaby)
-			.setContentTitle(context.getString(R.string.notificacao))
-			.setContentText(context.getString(R.string.notificacao_mensagem))
-			.setDefaults(Notification.DEFAULT_ALL);// requires VIBRATE permission
+		.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+		.setSmallIcon(R.drawable.mybaby)
+		.setContentTitle(context.getString(R.string.notificacao))
+		.setContentText(context.getString(R.string.notificacao_mensagem))
+		.setDefaults(Notification.DEFAULT_ALL);// requires VIBRATE permission
 		
-			// Creates an explicit intent for an Activity in your app
-		Intent resultIntent = new Intent(context, NotificacaoActivity.class);
+		// Creates an Intent for the Activity
+		Intent notifyIntent = new Intent(context, DeviceControlActivity.class);
+		
+		notifyIntent.putExtra(Constantes.NOTIFICACAO_ACTION_OK, Constantes.NOTIFICACAO_ACTION_OK);
+		// Sets the Activity to start in a new, empty task
+		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		// Creates the PendingIntent
+		PendingIntent notifyPendingIntent =
+		        PendingIntent.getActivity(
+		        context,
+		        0,
+		        notifyIntent,
+		        PendingIntent.FLAG_UPDATE_CURRENT
+		);
 
-		// The stack builder object will contain an artificial back stack for the
-		// started Activity.
-		// This ensures that navigating backward from the Activity leads out of
-		// your application to the Home screen.
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-		
-		// Adds the back stack for the Intent (but not the Intent itself)
-		stackBuilder.addParentStack(NotificacaoActivity.class);
-		
-		// Adds the Intent that starts the Activity to the top of the stack
-		stackBuilder.addNextIntent(resultIntent);
-		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-		builder.setContentIntent(resultPendingIntent);
+		// Puts the PendingIntent into the notification builder
+		builder.setContentIntent(notifyPendingIntent);
 		
 		startTimer();
 		
@@ -71,6 +75,7 @@ public class Notificacao2 {
 		
 		//ALTERA O VALOR NA BASE PARA TRUE(NOTIFICACAO ATIVA)
 		sistemaDAO.update(Constantes.NOTIFICACAO_ATIVO, Boolean.TRUE.toString());
+		
 		try {
 			int count = 1;
 			houveRespostaDaNotificacaoEnviada = true;
@@ -91,14 +96,19 @@ public class Notificacao2 {
 				//RETORNAR....
 				
 			}
+			
+			if(!isContinuarEnviando()){
+				cancelarNotificacao(Constantes.NOTIFICATION_ID);
+			}
 
 		} catch (InterruptedException e) {
 			Log.d(Constantes.DEBUG_TAG, "Erro no timer de notificação");
 		}
 
+		Log.d(Constantes.DEBUG_TAG, "Finalizaou o timer de notificação");
+		
 		//ALTERA STATUS NOTIFICAÇÃO ENVIO PARA TRUE
 		sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
-		Log.d(Constantes.DEBUG_TAG, "Finalizaou o timer de notificação");
 	}
 	
 	private void issueNotification(NotificationCompat.Builder builder) {

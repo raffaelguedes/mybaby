@@ -36,8 +36,19 @@
     
     <!-- NOTIFICACAO -->
     <string name="notificacao">MyBaby!</string>
-    <string name="notificacao_mensagem">MyBaby! Desconectado.</string>
+    <string name="notificacao_mensagem">MyBaby! Fora do alcance.</string>
     <string name="ok">OK</string>
     
     <!-- DIALOGO -->
+    
+    <!-- TELA PRINCIPAL -->
+    <string name="label_status">Status:</string>
+    <string name="conectado">Conectado</string>
+    <string name="desconectado">Desconectado</string>
+    <string name="aguardando">Aguardando</string>
+    <string name="aguardando_explain">A conexão com o dispositivo será automatica.</string>
+    
+    
+    <!-- TELA SCAN -->
+    
 </resources>
