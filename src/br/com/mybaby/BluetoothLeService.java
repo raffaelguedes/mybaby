@@ -34,7 +34,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 import br.com.mybaby.dao.SistemaDAO;
 
 /**
@@ -63,21 +62,14 @@ public class BluetoothLeService extends Service {
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
-    public final static String ACTION_GATT_CONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED_DIALOGO =
-            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED_DIALOGO";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED =
-            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE =
-            "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA =
-            "com.example.bluetooth.le.EXTRA_DATA";
+    public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED_DIALOGO = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED_DIALOGO";
+    public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+    public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+    public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
 
-    public final static UUID UUID_HEART_RATE_MEASUREMENT =
-            UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
+    public final static UUID UUID_HEART_RATE_MEASUREMENT = UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
     
     
     // Implements callback methods for GATT events that the app cares about.  For example,
@@ -122,12 +114,12 @@ public class BluetoothLeService extends Service {
             		if(!enviarNotificacao()){
             			//AGORA FUDEU...NÃO TEVE RESPOSTA EM NENHUMA DAS NOTIFICAÇÕES
             			//TENTATIVA DE RECONECTAR AO DISPOSITIVO
-            			if(connect(mBluetoothAdapter.getAddress())){
-            				Toast.makeText(getApplicationContext(), "MyBaby! Conectado!", Toast.LENGTH_LONG);
-            			}
+            			Log.i(TAG, "Sem resposta aos envios de Notificação.");
             			
-            			Toast.makeText(getApplicationContext(), "MyBaby! Ainda desconectado! FUDEU!!!!!", Toast.LENGTH_LONG);
-            			//FUDEU
+            			Log.i(TAG, "Os SMS serão enviados.");
+            			//CLASSE RESPONSAVEL POR ENVIAR O SMS
+            			 SMS sms = new SMS();
+            			 sms.enviarSMS();
             		}
             	}
             }
@@ -147,17 +139,14 @@ public class BluetoothLeService extends Service {
         }
 
         @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic characteristic,
-                                         int status) {
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             }
         }
 
         @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
     };

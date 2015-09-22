@@ -51,7 +51,7 @@ public class Notificacao2 {
 		
 		notifyIntent.putExtra(Constantes.NOTIFICACAO_ACTION_OK, Constantes.NOTIFICACAO_ACTION_OK);
 		// Sets the Activity to start in a new, empty task
-		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		//notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		// Creates the PendingIntent
 		PendingIntent notifyPendingIntent =
 		        PendingIntent.getActivity(

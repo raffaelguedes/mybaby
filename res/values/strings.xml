@@ -44,8 +44,10 @@
     <!-- TELA PRINCIPAL -->
     <string name="label_status">Status:</string>
     <string name="conectado">Conectado</string>
+    <string name="conectado_explain">Dispositivo conectado e sincronizado.</string>
     <string name="desconectado">Desconectado</string>
-    <string name="aguardando">Aguardando</string>
+    <string name="desconectado_explain">Dispositivo desconectado.</string>
+    <string name="aguardando">Fora do alcance</string>
     <string name="aguardando_explain">A conexão com o dispositivo será automatica.</string>
     
     
