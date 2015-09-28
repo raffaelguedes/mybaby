@@ -19,4 +19,8 @@ public final class Constantes {
     
     //DIALOGO
     public static final String DIALOGO_MOSTRAR = "DIALOGO_MOSTRAR"; 
+    
+    //SMS
+    public static final String SMS_ENVIADO = "SMS_ENVIADO";
+    public static final String SMS_ENTREGUE = "SMS_ENTREGUE";
 }

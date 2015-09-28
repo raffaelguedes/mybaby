@@ -3,11 +3,20 @@ package br.com.mybaby;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.telephony.SmsManager;
 
 public class SMS {
+	private Context context;
 	private List<String> numeros;
 	private String mensagem;
+
+	public SMS(Context context){
+		this.context = context;
+		
+	}
 	
 	public void enviarSMS(){
 		//LOGAR
@@ -17,17 +26,17 @@ public class SMS {
 		
 		//buscar lista de numeros
 		numeros = new ArrayList<String>();
-		numeros.add("982465760");
-		numeros.add("982301919");
+		numeros.add("5511982465760");
+		//numeros.add("5511982301919");
 		
 		//buscar a mensagem
-		mensagem = "MyBaby! Fora do alcance."
-				+ "Nenhuma resposta foi obtida pelo aplicativo."
-				+ "Entre em contato para saber se esta tudo bem.";
+		mensagem = "MyBaby! Fora do alcance. Mensagem automática.";
 		
 		SmsManager smsManager = SmsManager.getDefault();
+		PendingIntent pendingIntentEnviado = PendingIntent.getBroadcast(context, 0, new Intent(Constantes.SMS_ENVIADO), 0);
+		PendingIntent pendingIntentEntregue = PendingIntent.getBroadcast(context, 0, new Intent(Constantes.SMS_ENTREGUE), 0);
 		for(String numero : numeros){
-			smsManager.sendTextMessage(numero, null, mensagem, null, null);
+			smsManager.sendTextMessage(numero, null, mensagem, pendingIntentEnviado, pendingIntentEntregue);
 		}
 	}
 }

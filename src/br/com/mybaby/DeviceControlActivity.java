@@ -19,6 +19,8 @@ package br.com.mybaby;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.DialogFragment;
@@ -54,9 +56,11 @@ public class DeviceControlActivity extends Activity {
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
     public static final long TIMEOUT_DIALOGO = 1000*30; //1000 = 1 SEGUNDO
+    private final long TIMEOUT_DIALOGO_DOIS_MINUTOS = 60000*2;
 
     private ImageView imagemStatus;
     private TextView mConnectionExplain;
+    private TextView deviceAddress;
     private TextView mConnectionState;
     private TextView mDataField;
     private String mDeviceName;
@@ -65,6 +69,7 @@ public class DeviceControlActivity extends Activity {
     private BluetoothLeService mBluetoothLeService;
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
     private boolean mConnected = false;
+    private boolean isDesconexaoIntencional = false;
     private BluetoothGattCharacteristic mNotifyCharacteristic;
     private SistemaDAO sistemaDAO;
     
@@ -105,17 +110,17 @@ public class DeviceControlActivity extends Activity {
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
 
-            	imagemStatus.setImageResource(R.drawable.aguardando);
             	mConnected = true;
+            	imagemStatus.setImageResource(R.drawable.aguardando);
                 updateConnectionState(R.string.aguardando);
+
                 invalidateOptionsMenu();
+                
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action) || BluetoothLeService.ACTION_GATT_DISCONNECTED_DIALOGO.equals(action)) {
             	
             	mConnected = false;
             	imagemStatus.setImageResource(R.drawable.aguardando);
                 updateConnectionState(R.string.aguardando);
-                mConnectionExplain.setVisibility(View.GONE);
-            	mConnectionExplain.setText(R.string.aguardando_explain);
                 
                 invalidateOptionsMenu();
 
@@ -136,7 +141,11 @@ public class DeviceControlActivity extends Activity {
       
     public void onOkClickDialogo(){
     	
+    	imagemStatus.setImageResource(R.drawable.aguardando);
+        updateConnectionState(R.string.aguardando);
+    	
     	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE ALERTAS
+    	Log.d(TAG, "UPDATE > DeviceControlManager > onOkClickDialogo");
     	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.FALSE.toString());
 
     	//MANDA O APP PARA BACKGROUND
@@ -145,6 +154,15 @@ public class DeviceControlActivity extends Activity {
 //    	intentGoBackground.addCategory(Intent.CATEGORY_HOME);
 //    	this.startActivity(intentGoBackground);
     	
+    }
+    
+    public void onOkClickDialogoSMS(){
+    	
+    	//LOGA O CLIQUE NO DIALOGO
+    	
+    	//VOLTA A BOOLEANA  PARA FALSE
+    	sistemaDAO.update(Constantes.SMS_ENVIADO, Boolean.FALSE.toString());
+    	sistemaDAO.update(Constantes.SMS_ENTREGUE, Boolean.FALSE.toString());
     }
     
     private void mostrarDialogo(){
@@ -157,7 +175,12 @@ public class DeviceControlActivity extends Activity {
 //                newFragment.getDialog().dismiss(); // when the task active then close the dialog
 //                t.cancel(); // also just top the timer thread, otherwise, you may receive a crash report
 //            }
-//        }, TIMEOUT_DIALOGO);
+//        }, TIMEOUT_DIALOGO_DOIS_MINUTOS);
+    }
+    
+    private void mostrarDialogoSMS(){
+    	final DialogFragment newFragment = new SMSDialogo();
+        newFragment.show(DeviceControlActivity.this.getFragmentManager(), SMSDialogo.EXTRAS_DIALOGO_SMS);
     }
     
     // If a given GATT characteristic is selected, check for supported features.  This sample
@@ -201,6 +224,9 @@ public class DeviceControlActivity extends Activity {
         setContentView(R.layout.gatt_services_characteristics);
         
         sistemaDAO = new SistemaDAO(this);
+
+        //SETAR AS VARIAVEIS PARA PADRÃO
+        setarVariaveisPadrao();
         
         final Intent intent = getIntent();
         
@@ -210,7 +236,8 @@ public class DeviceControlActivity extends Activity {
         String dispositivoEnderecoBase = sistemaDAO.getValor(Constantes.DISPOSITIVO_ENDERECO);
         
         imagemStatus = (ImageView) findViewById(R.id.imagemStatus);
-        ((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
+        deviceAddress = (TextView) findViewById(R.id.device_address);
+        deviceAddress.setText(mDeviceAddress);
         //mGattServicesList = (ExpandableListView) findViewById(R.id.gatt_services_list);
         //mGattServicesList.setOnChildClickListener(servicesListClickListner);
         mConnectionState = (TextView) findViewById(R.id.connection_state);
@@ -239,16 +266,16 @@ public class DeviceControlActivity extends Activity {
         }
         
         
-        String onOkClick = intent.getStringExtra(Constantes.NOTIFICACAO_ACTION_OK);
-        if(onOkClick != null && onOkClick != ""){
-        	
-        	onOkClick();
-        	
-        	
-        } else {
-        	//ALTERA STATUS NOTIFICAÇÃO ENVIO PARA TRUE
-    		sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
-        }
+//        String onOkClick = intent.getStringExtra(Constantes.NOTIFICACAO_ACTION_OK);
+//        if(onOkClick != null && onOkClick != ""){
+//        	
+//        	onOkClick();
+//        	
+//        	
+//        } else {
+//        	//ALTERA STATUS NOTIFICAÇÃO ENVIO PARA TRUE
+//    		sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
+//        }
         
         getActionBar().setTitle(mDeviceName);
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -257,33 +284,48 @@ public class DeviceControlActivity extends Activity {
         
     }
     
-    private void onOkClick(){
+    private void setarVariaveisPadrao() {
+    	Log.d(TAG, "UPDATE > DeviceControlManager > setarVariaveisPadrao");
+    	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
+    	sistemaDAO.update(Constantes.NOTIFICACAO_ATIVO, Boolean.FALSE.toString());
+		
+	}
+
+	private void onOkClick(){
     	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE NOTIFICAÇÕES
+		Log.d(TAG, "UPDATE > DeviceControlManager > onOkClick");
     	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.FALSE.toString());
     	
     	updateConnectionState(R.string.aguardando);
     	imagemStatus.setImageResource(R.drawable.aguardando);
-    	mConnectionExplain.setVisibility(View.GONE);
-    	mConnectionExplain.setText(R.string.aguardando_explain);
     }
     
     private boolean isNotificacaoAtivo(){
     	return Boolean.parseBoolean(sistemaDAO.getValor(Constantes.NOTIFICACAO_ATIVO));
     }
+    
+    private boolean isSMSEnviado(){
+    	return Boolean.parseBoolean(sistemaDAO.getValor(Constantes.SMS_ENTREGUE));
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        VisibilidadeManager.setMainActivityVisible(Boolean.TRUE);
         
-        //E QUANDO O APP ESTIVER EM BACKGROUND, OCORRER A DESCONEXAO E AO INVÉS DE VERIFICAR A NOTIFICAÇÃO, ABRIR O APP.
-        //O QUE FAZERRRRRRR
-        if(isNotificacaoAtivo()){
-        	onOkClick();
+        
+        if(isNotificacaoAtivo() && !isDesconexaoIntencional() && !isSMSEnviado()){
+        	mostrarDialogo();
         }
+        
+        if(isSMSEnviado()){
+        	mostrarDialogoSMS();
+        }
+        
+        VisibilidadeManager.setMainActivityVisible(Boolean.TRUE);
         
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         if (mBluetoothLeService != null) {
+        	setDesconexaoIntencional(Boolean.FALSE);
             final boolean result = mBluetoothLeService.connect(mDeviceAddress);
             Log.d(TAG, "Connect request result=" + result);
         }
@@ -325,6 +367,7 @@ public class DeviceControlActivity extends Activity {
                 mBluetoothLeService.connect(mDeviceAddress);
                 return true;
             case R.id.menu_disconnect:
+            	setDesconexaoIntencional(Boolean.TRUE);
                 mBluetoothLeService.disconnect();
                 return true;
             case android.R.id.home:
@@ -338,7 +381,15 @@ public class DeviceControlActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mConnectionState.setText(resourceId);
+            	deviceAddress.setText(mDeviceAddress);
+            	mConnectionState.setText(resourceId);
+            	if(R.string.conectado == resourceId){
+            		mConnectionExplain.setText(R.string.conectado_explain);
+            	} else if(R.string.aguardando == resourceId){
+            		mConnectionExplain.setText(R.string.aguardando_explain);
+            	} else if(R.string.desconectado == resourceId){
+            		mConnectionExplain.setText(R.string.desconectado_explain);
+            	}
             }
         });
     }
@@ -410,4 +461,12 @@ public class DeviceControlActivity extends Activity {
         
         return intentFilter;
     }
+
+	public boolean isDesconexaoIntencional() {
+		return isDesconexaoIntencional;
+	}
+
+	public void setDesconexaoIntencional(boolean isDesconexaoIntencional) {
+		this.isDesconexaoIntencional = isDesconexaoIntencional;
+	}
 }

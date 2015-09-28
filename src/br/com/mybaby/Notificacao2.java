@@ -10,6 +10,7 @@ import android.util.Log;
 import br.com.mybaby.dao.SistemaDAO;
 
 public class Notificacao2 {
+	private final static String TAG = Notificacao2.class.getSimpleName();
 	private Context context;
 	private SistemaDAO sistemaDAO;
 	private NotificationCompat.Builder builder;
@@ -32,7 +33,7 @@ public class Notificacao2 {
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.cancel(idNotificacao);
 		
-		
+		Log.d(TAG, "UPDATE > Notificacao2 > cancelarNotificacao");
 		sistemaDAO.update(Constantes.NOTIFICACAO_ATIVO, Boolean.FALSE.toString());
 
 	}
@@ -74,23 +75,25 @@ public class Notificacao2 {
 		Log.d(Constantes.DEBUG_TAG, "Inicio timer notificação");
 		
 		//ALTERA O VALOR NA BASE PARA TRUE(NOTIFICACAO ATIVA)
+		Log.d(TAG, "UPDATE > Notificacao2 > startTimer");
 		sistemaDAO.update(Constantes.NOTIFICACAO_ATIVO, Boolean.TRUE.toString());
 		
 		try {
 			int count = 1;
 			houveRespostaDaNotificacaoEnviada = true;
-			while (isContinuarEnviando() && count <= MAX_ENVIO_OITO) {
+			while (isContinuarEnviando() && count <= MAX_ENVIO_QUATRO) {
 				issueNotification(builder);
+				Log.d(Constantes.DEBUG_TAG, "Notificação de número: " + count);
 				
-				if(count == (MAX_ENVIO_OITO/2)){
-					Thread.sleep(DOIS_MINUTOS);
+				if(count == (MAX_ENVIO_QUATRO/2)){
+					Thread.sleep(TRINTA_SEGUNDOS);
 				}else{
 					Thread.sleep(TRINTA_SEGUNDOS);
 				}
 				count ++;
 			}
 			
-			if(isContinuarEnviando() || count >= MAX_ENVIO_OITO){
+			if(isContinuarEnviando() || count >= MAX_ENVIO_QUATRO){
 				houveRespostaDaNotificacaoEnviada = false;
 				//ESGOTOU OS ENVIOS E NÃO TEVE RESPOSTA
 				//RETORNAR....
@@ -108,6 +111,7 @@ public class Notificacao2 {
 		Log.d(Constantes.DEBUG_TAG, "Finalizaou o timer de notificação");
 		
 		//ALTERA STATUS NOTIFICAÇÃO ENVIO PARA TRUE
+		Log.d(TAG, "UPDATE > Notificacao2 > startTimer");
 		sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
 	}
 	

@@ -29,8 +29,10 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -48,9 +50,13 @@ public class BluetoothLeService extends Service {
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
-    private boolean isDesconexaoIntencional = true;
+    private boolean isDesconexaoIntencional = Boolean.FALSE;
     private SistemaDAO sistemaDAO;
     private Notificacao2 notificacao2;
+    
+    private BroadcastReceiver mensagemEnviada;
+	private BroadcastReceiver mensagemEntregue;
+    
     
     public BluetoothLeService(){
     	sistemaDAO = new SistemaDAO(this);
@@ -62,15 +68,14 @@ public class BluetoothLeService extends Service {
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
-    public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED_DIALOGO = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED_DIALOGO";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
+    public final static String ACTION_GATT_CONNECTED = "br.com.mybaby.bluetooth.le.ACTION_GATT_CONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED = "br.com.mybaby.bluetooth.le.ACTION_GATT_DISCONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED_DIALOGO = "br.com.mybaby.bluetooth.le.ACTION_GATT_DISCONNECTED_DIALOGO";
+    public final static String ACTION_GATT_SERVICES_DISCOVERED = "br.com.mybaby.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+    public final static String ACTION_DATA_AVAILABLE = "br.com.mybaby.bluetooth.le.ACTION_DATA_AVAILABLE";
+    public final static String EXTRA_DATA = "br.com.mybaby.bluetooth.le.EXTRA_DATA";
 
     public final static UUID UUID_HEART_RATE_MEASUREMENT = UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
-    
     
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -94,11 +99,9 @@ public class BluetoothLeService extends Service {
                         mBluetoothGatt.discoverServices());
                 
 
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            	setDesconexaoIntencional(Boolean.TRUE);
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {                        
             	
-            	
-            	if(VisibilidadeManager.isMainActivityVisible()){
+            	if(VisibilidadeManager.isMainActivityVisible() && !isDesconexaoIntencional()){
             		//MOSTRA O DIALOGO
             		intentAction = ACTION_GATT_DISCONNECTED_DIALOGO;
             	} else {
@@ -109,20 +112,31 @@ public class BluetoothLeService extends Service {
             	Log.i(TAG, "Disconnected from GATT server.");
             	broadcastUpdate(intentAction);
             	
-            	if (isDesconexaoIntencional()) {
+            	if (!isDesconexaoIntencional()) {
             		//ENVIA AS NOTIFICAÇÕES
             		if(!enviarNotificacao()){
             			//AGORA FUDEU...NÃO TEVE RESPOSTA EM NENHUMA DAS NOTIFICAÇÕES
             			//TENTATIVA DE RECONECTAR AO DISPOSITIVO
             			Log.i(TAG, "Sem resposta aos envios de Notificação.");
-            			
+
             			Log.i(TAG, "Os SMS serão enviados.");
-            			//CLASSE RESPONSAVEL POR ENVIAR O SMS
-            			 SMS sms = new SMS();
-            			 sms.enviarSMS();
+            			Log.i(TAG, "Registrando os Broadcasts Receivers.");
+            			
+            			mensagemEnviada = new SMSEnviadoReceiver(BluetoothLeService.this); 
+            			BluetoothLeService.this.registerReceiver(mensagemEnviada, new IntentFilter(Constantes.SMS_ENVIADO));
+            		    
+            		    mensagemEntregue = new SMSEntregueReceiver(BluetoothLeService.this);
+            		    BluetoothLeService.this.registerReceiver(mensagemEntregue, new IntentFilter(Constantes.SMS_ENTREGUE));
+            			
+            			
+            			SMS sms = new SMS(BluetoothLeService.this);
+            			sms.enviarSMS();
             		}
             	}
+            	//VOLTA A BOOLEANA DE INTENCIONAL PARA FALSE
+            	setDesconexaoIntencional(Boolean.FALSE);
             }
+            
         }
         
         private boolean enviarNotificacao(){
@@ -292,7 +306,7 @@ public class BluetoothLeService extends Service {
      * callback.
      */
     public void disconnect() {
-    	setDesconexaoIntencional(Boolean.FALSE);
+    	setDesconexaoIntencional(Boolean.TRUE);
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
@@ -310,6 +324,11 @@ public class BluetoothLeService extends Service {
         }
         mBluetoothGatt.close();
         mBluetoothGatt = null;
+        
+        if(mensagemEntregue != null && mensagemEnviada != null){
+        	unregisterReceiver(mensagemEntregue);
+        	unregisterReceiver(mensagemEnviada);
+        }
     }
 
     /**

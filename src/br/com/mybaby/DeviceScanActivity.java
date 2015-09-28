@@ -140,12 +140,9 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     protected void onPause() {
-    	super.onPause();
-    	//scanLeDevice(false);
-    	scanLeDevice(true);
-    	if(mLeDeviceListAdapter!=null){
-    		mLeDeviceListAdapter.clear();
-    	}
+        super.onPause();
+        scanLeDevice(false);
+        mLeDeviceListAdapter.clear();
     }
 
     @Override
