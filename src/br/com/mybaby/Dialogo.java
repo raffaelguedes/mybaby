@@ -15,12 +15,14 @@ public class Dialogo extends DialogFragment {
 	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
+		
 		// Use the Builder class for convenient dialog construction
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setMessage("MyBaby! Fora do alcance.")
+		builder.setMessage("\n\n		MyBaby! Esta a salvo! \n\n")
+		.setIcon(R.drawable.mybaby)
 		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				Log.i(TAG, "Ciente da desconexão por Dialogo" + Util.getDataAtual());
+				Log.i(TAG, "Ciente da desconexão por Dialogo. " + Util.getDataAtual());
 				
 				((DeviceControlActivity)getActivity()).onOkClickDialogo();
 				

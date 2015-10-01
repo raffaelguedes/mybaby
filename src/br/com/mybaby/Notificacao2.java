@@ -17,6 +17,7 @@ public class Notificacao2 {
 	private boolean houveRespostaDaNotificacaoEnviada;
 	
 	private final long DOIS_MINUTOS = 60000*2;
+	private final long HUM_MINUTO = 60000;
 	private final long TRINTA_SEGUNDOS = 1000*30;
 	private final long QUINZE_SEGUNDOS = 1000*15;
 	private final long CINCO_SEGUNDOS = 1000*5;
@@ -81,19 +82,19 @@ public class Notificacao2 {
 		try {
 			int count = 1;
 			houveRespostaDaNotificacaoEnviada = true;
-			while (isContinuarEnviando() && count <= MAX_ENVIO_QUATRO) {
+			while (isContinuarEnviando() && count <= MAX_ENVIO_OITO) {
 				issueNotification(builder);
-				Log.d(Constantes.DEBUG_TAG, "Notificação de número: " + count);
+				Log.d(Constantes.DEBUG_TAG, "Notificação de número: " + count +" | "+ Util.getDataAtual());
 				
-				if(count == (MAX_ENVIO_QUATRO/2)){
-					Thread.sleep(TRINTA_SEGUNDOS);
+				if(count == (MAX_ENVIO_OITO/2)){
+					Thread.sleep(DOIS_MINUTOS);
 				}else{
 					Thread.sleep(TRINTA_SEGUNDOS);
 				}
 				count ++;
 			}
 			
-			if(isContinuarEnviando() || count >= MAX_ENVIO_QUATRO){
+			if(isContinuarEnviando() || count >= MAX_ENVIO_OITO){
 				houveRespostaDaNotificacaoEnviada = false;
 				//ESGOTOU OS ENVIOS E NÃO TEVE RESPOSTA
 				//RETORNAR....

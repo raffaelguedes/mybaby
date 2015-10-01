@@ -18,6 +18,7 @@ package br.com.mybaby;
 
 import java.util.ArrayList;
 
+import br.com.mybaby.dao.SistemaDAO;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
@@ -46,6 +47,7 @@ public class DeviceScanActivity extends ListActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
     private Handler mHandler;
+    private SistemaDAO sistemaDAO;
 
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
@@ -56,6 +58,8 @@ public class DeviceScanActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         getActionBar().setTitle(R.string.title_devices);
         mHandler = new Handler();
+        
+        sistemaDAO = new SistemaDAO(this);
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
@@ -255,8 +259,16 @@ public class DeviceScanActivity extends ListActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+//                	if(device.getAddress().equals(sistemaDAO.getValor(Constantes.DISPOSITIVO_ENDERECO))){
+//                		final Intent intent = new Intent(DeviceScanActivity.this, DeviceControlActivity.class);
+//                        intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());
+//                        intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress());
+//                        startActivity(intent);
+//                	}else{
+                	
                     mLeDeviceListAdapter.addDevice(device);
                     mLeDeviceListAdapter.notifyDataSetChanged();
+//                	}
                 }
             });
         }

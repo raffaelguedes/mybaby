@@ -19,8 +19,6 @@ package br.com.mybaby;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.DialogFragment;
@@ -42,6 +40,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
+import br.com.mybaby.dao.ConfiguracaoDAO;
 import br.com.mybaby.dao.SistemaDAO;
 
 /**
@@ -72,6 +71,7 @@ public class DeviceControlActivity extends Activity {
     private boolean isDesconexaoIntencional = false;
     private BluetoothGattCharacteristic mNotifyCharacteristic;
     private SistemaDAO sistemaDAO;
+    private ConfiguracaoDAO configuracaoDAO;
     
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
@@ -144,9 +144,12 @@ public class DeviceControlActivity extends Activity {
     	imagemStatus.setImageResource(R.drawable.aguardando);
         updateConnectionState(R.string.aguardando);
     	
+        invalidateOptionsMenu();
+        
     	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE ALERTAS
     	Log.d(TAG, "UPDATE > DeviceControlManager > onOkClickDialogo");
     	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.FALSE.toString());
+    	
 
     	//MANDA O APP PARA BACKGROUND
 //    	Intent intentGoBackground = new Intent();
@@ -181,6 +184,23 @@ public class DeviceControlActivity extends Activity {
     private void mostrarDialogoSMS(){
     	final DialogFragment newFragment = new SMSDialogo();
         newFragment.show(DeviceControlActivity.this.getFragmentManager(), SMSDialogo.EXTRAS_DIALOGO_SMS);
+    }
+    
+    public void onOkClickDialogoNomeBaby(String nome){
+    	
+    	if(nome == null || nome.equals("")){
+    		nome = "MyBaby!";
+    	}
+    	Configuracao configuracao = new Configuracao();
+    	configuracao.setNomeMyBaby(nome.trim());
+    	configuracaoDAO.inserir(configuracao);
+    	
+    	getActionBar().setTitle(configuracao.getNomeMyBaby());
+    }
+    
+    private void mostrarDialogoNomeBaby(){
+    	final DialogFragment newFragment = new NomeBabyDialogo();
+        newFragment.show(DeviceControlActivity.this.getFragmentManager(), NomeBabyDialogo.EXTRAS_DIALOGO_NOME_BABY);
     }
     
     // If a given GATT characteristic is selected, check for supported features.  This sample
@@ -224,6 +244,7 @@ public class DeviceControlActivity extends Activity {
         setContentView(R.layout.gatt_services_characteristics);
         
         sistemaDAO = new SistemaDAO(this);
+        configuracaoDAO = new ConfiguracaoDAO(this);
 
         //SETAR AS VARIAVEIS PARA PADRÃO
         setarVariaveisPadrao();
@@ -265,19 +286,18 @@ public class DeviceControlActivity extends Activity {
         	mDeviceAddress = dispositivoEnderecoBase;
         }
         
+        Configuracao configuracao = configuracaoDAO.getConfiguracao();
         
-//        String onOkClick = intent.getStringExtra(Constantes.NOTIFICACAO_ACTION_OK);
-//        if(onOkClick != null && onOkClick != ""){
-//        	
-//        	onOkClick();
-//        	
-//        	
-//        } else {
-//        	//ALTERA STATUS NOTIFICAÇÃO ENVIO PARA TRUE
-//    		sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
-//        }
+        if(configuracao == null || configuracao.getNomeMyBaby().equals("")){
+        	mostrarDialogoNomeBaby();
+        }else{
+        	//PARA TESTE. RETIRAR QUANDO ESTIVER OK
+        	configuracao.setNomeMyBaby("");
+        	configuracaoDAO.update(configuracao);
+        	mostrarDialogoNomeBaby();
+        }
         
-        getActionBar().setTitle(mDeviceName);
+        getActionBar().setTitle("MyBaby!");
         getActionBar().setDisplayHomeAsUpEnabled(true);
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -298,6 +318,8 @@ public class DeviceControlActivity extends Activity {
     	
     	updateConnectionState(R.string.aguardando);
     	imagemStatus.setImageResource(R.drawable.aguardando);
+    	
+    	 invalidateOptionsMenu();
     }
     
     private boolean isNotificacaoAtivo(){
@@ -329,6 +351,8 @@ public class DeviceControlActivity extends Activity {
             final boolean result = mBluetoothLeService.connect(mDeviceAddress);
             Log.d(TAG, "Connect request result=" + result);
         }
+        
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -345,6 +369,7 @@ public class DeviceControlActivity extends Activity {
         super.onDestroy();
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
+        sistemaDAO.close();
     }
 
     @Override
@@ -371,7 +396,9 @@ public class DeviceControlActivity extends Activity {
                 mBluetoothLeService.disconnect();
                 return true;
             case android.R.id.home:
-                onBackPressed();
+            	//final Intent intent = new Intent(this, DeviceScanActivity.class);
+            	//startActivity(intent);
+            	onBackPressed();
                 return true;
         }
         return super.onOptionsItemSelected(item);
