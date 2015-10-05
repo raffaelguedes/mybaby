@@ -9,8 +9,8 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import br.com.mybaby.dao.SistemaDAO;
 
-public class Notificacao2 {
-	private final static String TAG = Notificacao2.class.getSimpleName();
+public class Notificacao {
+	private final static String TAG = Notificacao.class.getSimpleName();
 	private Context context;
 	private SistemaDAO sistemaDAO;
 	private NotificationCompat.Builder builder;
@@ -34,7 +34,7 @@ public class Notificacao2 {
 		    "Bu·····!!! Enviando SMS!!!"
 	};
 	
-	public Notificacao2(Context context) {
+	public Notificacao(Context context) {
 		this.context = context;
 		sistemaDAO = new SistemaDAO(context);
 	}
@@ -90,7 +90,7 @@ public class Notificacao2 {
 		try {
 			int count = 1;
 			houveRespostaDaNotificacaoEnviada = true;
-			while (isContinuarEnviando() && count <= MAX_ENVIO) {
+			while (isContinuarEnviando() && count <= MAX_ENVIO && !isDispositivoConectadoSincronizado()) {
 				builder.setContentText(mensagens[count-1]);
 				issueNotification(builder);
 				Log.d(Constantes.DEBUG_TAG, "NotificaÁ„o de n˙mero: " + count +" | "+ Util.getDataAtual());
@@ -103,14 +103,14 @@ public class Notificacao2 {
 				count ++;
 			}
 			
-			if(isContinuarEnviando() || count >= MAX_ENVIO){
+			if((isContinuarEnviando() || count >= MAX_ENVIO) && !isDispositivoConectadoSincronizado()){
 				houveRespostaDaNotificacaoEnviada = false;
 				//ESGOTOU OS ENVIOS E N√O TEVE RESPOSTA
 				//RETORNAR....
 				
 			}
 			
-			if(!isContinuarEnviando()){
+			if(!isContinuarEnviando() || isDispositivoConectadoSincronizado()){
 				cancelarNotificacao(Constantes.NOTIFICATION_ID);
 			}
 
@@ -119,10 +119,6 @@ public class Notificacao2 {
 		}
 
 		Log.d(Constantes.DEBUG_TAG, "Finalizaou o timer de notificaÁ„o");
-		
-		//ALTERA STATUS NOTIFICA«√O ENVIO PARA TRUE
-		Log.d(TAG, "UPDATE > Notificacao2 > startTimer");
-		sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
 	}
 	
 	private void issueNotification(NotificationCompat.Builder builder) {
@@ -132,6 +128,10 @@ public class Notificacao2 {
 	}
 	
 	private boolean isContinuarEnviando(){
-		return Boolean.valueOf(sistemaDAO.getValor(Constantes.NOTIFICACAO_ENVIO));
+		return Boolean.valueOf(sistemaDAO.getValor(Constantes.KEEP_ENVIO_ALERTA));
+	}
+	
+	private boolean isDispositivoConectadoSincronizado(){
+		return Boolean.valueOf(sistemaDAO.getValor(Constantes.DISPOSITIVO_CONECTADO_SINCRONIZADO));
 	}
 }

@@ -148,7 +148,7 @@ public class DeviceControlActivity extends Activity {
         
     	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE ALERTAS
     	Log.d(TAG, "UPDATE > DeviceControlManager > onOkClickDialogo");
-    	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.FALSE.toString());
+    	sistemaDAO.update(Constantes.KEEP_ENVIO_ALERTA, Boolean.FALSE.toString());
     	
 
     	//MANDA O APP PARA BACKGROUND
@@ -163,10 +163,6 @@ public class DeviceControlActivity extends Activity {
     	
     	//LOGA O CLIQUE NO DIALOGO
     	
-    	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE ALERTAS
-    	Log.d(TAG, "UPDATE > DeviceControlManager > onOkClickDialogoSMS");
-    	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
-    	
     	//VOLTA A BOOLEANA  PARA FALSE
     	sistemaDAO.update(Constantes.SMS_ENVIADO, Boolean.FALSE.toString());
     	sistemaDAO.update(Constantes.SMS_ENTREGUE, Boolean.FALSE.toString());
@@ -175,6 +171,7 @@ public class DeviceControlActivity extends Activity {
     private void mostrarDialogo(){
     	final DialogFragment newFragment = new Dialogo();
         newFragment.show(DeviceControlActivity.this.getFragmentManager(), Dialogo.EXTRAS_DIALOGO);
+        
         
 //        final Timer t = new Timer();
 //        t.schedule(new TimerTask() {
@@ -249,9 +246,6 @@ public class DeviceControlActivity extends Activity {
         
         sistemaDAO = new SistemaDAO(this);
         configuracaoDAO = new ConfiguracaoDAO(this);
-
-        //SETAR AS VARIAVEIS PARA PADRÃO
-        setarVariaveisPadrao();
         
         final Intent intent = getIntent();
         
@@ -307,18 +301,11 @@ public class DeviceControlActivity extends Activity {
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         
     }
-    
-    private void setarVariaveisPadrao() {
-    	Log.d(TAG, "UPDATE > DeviceControlManager > setarVariaveisPadrao");
-    	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
-    	sistemaDAO.update(Constantes.NOTIFICACAO_ATIVO, Boolean.FALSE.toString());
-		
-	}
 
 	private void onOkClick(){
     	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE NOTIFICAÇÕES
 		Log.d(TAG, "UPDATE > DeviceControlManager > onOkClick");
-    	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.FALSE.toString());
+    	sistemaDAO.update(Constantes.KEEP_ENVIO_ALERTA, Boolean.FALSE.toString());
     	
     	updateConnectionState(R.string.aguardando);
     	imagemStatus.setImageResource(R.drawable.aguardando);
@@ -339,7 +326,7 @@ public class DeviceControlActivity extends Activity {
         super.onResume();
         
         if(isNotificacaoAtivo() && !isDesconexaoIntencional() && !isSMSEnviado()){
-        	mostrarDialogo();
+        	onOkClickDialogo();
         }
         
         if(isSMSEnviado()){

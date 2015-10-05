@@ -36,6 +36,7 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import br.com.mybaby.dao.LogDAO;
 import br.com.mybaby.dao.SistemaDAO;
 
 /**
@@ -52,7 +53,8 @@ public class BluetoothLeService extends Service {
     private int mConnectionState = STATE_DISCONNECTED;
     private boolean isDesconexaoIntencional = Boolean.FALSE;
     private SistemaDAO sistemaDAO;
-    private Notificacao2 notificacao2;
+    private Notificacao notificacao;
+    private LogDAO logDAO;
     
     private BroadcastReceiver mensagemEnviada;
 	private BroadcastReceiver mensagemEntregue;
@@ -62,7 +64,8 @@ public class BluetoothLeService extends Service {
     
     public BluetoothLeService(){
     	sistemaDAO = new SistemaDAO(this);
-    	notificacao2 = new Notificacao2(this);
+    	notificacao = new Notificacao(this);
+    	logDAO = new LogDAO(this);
     }
 
     private static final long TRINTA_SEGUNDOS = 1000*30;
@@ -86,10 +89,14 @@ public class BluetoothLeService extends Service {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
+            	
+            	
+            	sistemaDAO.update(Constantes.KEEP_ENVIO_ALERTA, Boolean.TRUE.toString());
+            	sistemaDAO.update(Constantes.DISPOSITIVO_CONECTADO_SINCRONIZADO, Boolean.TRUE.toString());
 
             	if(Boolean.valueOf(sistemaDAO.getValor(Constantes.NOTIFICACAO_ATIVO))){
             		//CANCELA A NOTIFICAÇÃO ENVIADA
-            		notificacao2.cancelarNotificacao(Constantes.NOTIFICATION_ID);
+            		notificacao.cancelarNotificacao(Constantes.NOTIFICATION_ID);
             		
             	}
             	
@@ -101,6 +108,8 @@ public class BluetoothLeService extends Service {
                 Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {                        
+            	
+            	sistemaDAO.update(Constantes.DISPOSITIVO_CONECTADO_SINCRONIZADO, Boolean.FALSE.toString());
             	
             	if(VisibilidadeManager.isMainActivityVisible() && !isDesconexaoIntencional()){
             		//MOSTRA O DIALOGO
@@ -128,12 +137,9 @@ public class BluetoothLeService extends Service {
             	
             	//VOLTA A BOOLEANA DE INTENCIONAL PARA FALSE
             	setDesconexaoIntencional(Boolean.FALSE);
+            	
             }
             
-        }
-        
-        private boolean enviarNotificacao(){
-        	return notificacao2.enviarNotificacao();
         }
         
         @Override
@@ -225,13 +231,6 @@ public class BluetoothLeService extends Service {
      * @return Return true if the initialization is successful.
      */
     public boolean initialize() {
-    	//CANCELANDO A NOTIFICAÇÃO CASO ESTEJA ATIVO
-    	if(Boolean.valueOf(sistemaDAO.getValor(Constantes.NOTIFICACAO_ATIVO))){
-    		//CANCELA A NOTIFICAÇÃO ENVIADA
-    		notificacao2.cancelarNotificacao(Constantes.NOTIFICATION_ID);
-    	}
-    	
-    	
         // For API level 18 and above, get a reference to BluetoothAdapter through
         // BluetoothManager.
         if (mBluetoothManager == null) {
