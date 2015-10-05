@@ -21,9 +21,18 @@ public class Notificacao2 {
 	private final long TRINTA_SEGUNDOS = 1000*30;
 	private final long QUINZE_SEGUNDOS = 1000*15;
 	private final long CINCO_SEGUNDOS = 1000*5;
-	private final int MAX_ENVIO_QUATRO = 4;
-	private final int MAX_ENVIO_DOIS = 2;
-	private final int MAX_ENVIO_OITO = 8;
+	private final int MAX_ENVIO = 8;
+	
+	private String[] mensagens = {
+			"Alerta do MyBaby! Tudo Certo!?",
+		    "Tirou o baby! Ufa!",
+		    "Hello. Tem alguÈm aÌ!!!",
+		    "Alerta do MyBaby! Tudo Certo!?",
+		    "Ser· que estou sozinho aqui!?",
+		    "Alerta do MyBaby! Tudo Certo!?",
+		    "Estou preocupado!!! Ei!!!",
+		    "Bu·····!!! Enviando SMS!!!"
+	};
 	
 	public Notificacao2(Context context) {
 		this.context = context;
@@ -45,7 +54,6 @@ public class Notificacao2 {
 		.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 		.setSmallIcon(R.drawable.mybaby)
 		.setContentTitle(context.getString(R.string.notificacao))
-		.setContentText(context.getString(R.string.notificacao_mensagem))
 		.setDefaults(Notification.DEFAULT_ALL);// requires VIBRATE permission
 		
 		// Creates an Intent for the Activity
@@ -82,19 +90,20 @@ public class Notificacao2 {
 		try {
 			int count = 1;
 			houveRespostaDaNotificacaoEnviada = true;
-			while (isContinuarEnviando() && count <= MAX_ENVIO_OITO) {
+			while (isContinuarEnviando() && count <= MAX_ENVIO) {
+				builder.setContentText(mensagens[count-1]);
 				issueNotification(builder);
 				Log.d(Constantes.DEBUG_TAG, "NotificaÁ„o de n˙mero: " + count +" | "+ Util.getDataAtual());
 				
-				if(count == (MAX_ENVIO_OITO/2)){
-					Thread.sleep(DOIS_MINUTOS);
+				if(count == (MAX_ENVIO/2)){
+					Thread.sleep(HUM_MINUTO);
 				}else{
 					Thread.sleep(TRINTA_SEGUNDOS);
 				}
 				count ++;
 			}
 			
-			if(isContinuarEnviando() || count >= MAX_ENVIO_OITO){
+			if(isContinuarEnviando() || count >= MAX_ENVIO){
 				houveRespostaDaNotificacaoEnviada = false;
 				//ESGOTOU OS ENVIOS E N√O TEVE RESPOSTA
 				//RETORNAR....

@@ -18,7 +18,7 @@ public class Dialogo extends DialogFragment {
 		
 		// Use the Builder class for convenient dialog construction
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setMessage("\n\n		MyBaby! Esta a salvo! \n\n")
+		builder.setMessage("\n\n		MyBaby! Em segurança! \n\n")
 		.setIcon(R.drawable.mybaby)
 		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {

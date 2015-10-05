@@ -163,6 +163,10 @@ public class DeviceControlActivity extends Activity {
     	
     	//LOGA O CLIQUE NO DIALOGO
     	
+    	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE ALERTAS
+    	Log.d(TAG, "UPDATE > DeviceControlManager > onOkClickDialogoSMS");
+    	sistemaDAO.update(Constantes.NOTIFICACAO_ENVIO, Boolean.TRUE.toString());
+    	
     	//VOLTA A BOOLEANA  PARA FALSE
     	sistemaDAO.update(Constantes.SMS_ENVIADO, Boolean.FALSE.toString());
     	sistemaDAO.update(Constantes.SMS_ENTREGUE, Boolean.FALSE.toString());
@@ -319,7 +323,7 @@ public class DeviceControlActivity extends Activity {
     	updateConnectionState(R.string.aguardando);
     	imagemStatus.setImageResource(R.drawable.aguardando);
     	
-    	 invalidateOptionsMenu();
+    	invalidateOptionsMenu();
     }
     
     private boolean isNotificacaoAtivo(){
@@ -333,7 +337,6 @@ public class DeviceControlActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        
         
         if(isNotificacaoAtivo() && !isDesconexaoIntencional() && !isSMSEnviado()){
         	mostrarDialogo();

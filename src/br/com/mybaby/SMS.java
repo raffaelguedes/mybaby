@@ -7,8 +7,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.SmsManager;
+import android.util.Log;
 
 public class SMS {
+	private final static String TAG = SMS.class.getSimpleName();
+	
 	private Context context;
 	private List<String> numeros;
 	private String mensagem;
@@ -27,15 +30,16 @@ public class SMS {
 		//buscar lista de numeros
 		numeros = new ArrayList<String>();
 		numeros.add("5511982465760");
-		//numeros.add("5511982301919");
+		numeros.add("5511982301919");
 		
 		//buscar a mensagem
-		mensagem = "MyBaby! Fora do alcance. Mensagem automática.";
+		mensagem = "MyBaby! Mensagem automática de emergência! Entre em contato!";
 		
 		SmsManager smsManager = SmsManager.getDefault();
 		PendingIntent pendingIntentEnviado = PendingIntent.getBroadcast(context, 0, new Intent(Constantes.SMS_ENVIADO), 0);
 		PendingIntent pendingIntentEntregue = PendingIntent.getBroadcast(context, 0, new Intent(Constantes.SMS_ENTREGUE), 0);
 		for(String numero : numeros){
+			Log.d(TAG, "Enviando SMS para o número: " + numero);
 			smsManager.sendTextMessage(numero, null, mensagem, pendingIntentEnviado, pendingIntentEntregue);
 		}
 	}

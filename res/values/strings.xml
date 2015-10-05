@@ -36,7 +36,14 @@
     
     <!-- NOTIFICACAO -->
     <string name="notificacao">MyBaby!</string>
-    <string name="notificacao_mensagem">Tirou o bebê! Ufa!</string>
+    <string name="notificacao_mensagem_1">Alerta do MyBaby! Tudo Certo!</string>
+    <string name="notificacao_mensagem_2">Tirou o baby! Ufa!</string>
+    <string name="notificacao_mensagem_3">Hello. Tem alguém aí!!!</string>
+    <string name="notificacao_mensagem_4">Alerta do MyBaby! Tudo Certo!?</string>
+    <string name="notificacao_mensagem_5">Estou começando a ficar preocupado!!!</string>
+    <string name="notificacao_mensagem_6">Alerta do MyBaby! Tudo Certo!</string>
+    <string name="notificacao_mensagem_7">Será que estou sozinho aqui!?</string>
+    <string name="notificacao_mensagem_8">Sem respostas!!! Buááááá!!! Os sms´s serão enviados agora!!!</string>
     <string name="ok">OK</string>
     
     <!-- DIALOGO -->
