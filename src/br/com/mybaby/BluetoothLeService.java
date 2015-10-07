@@ -76,6 +76,7 @@ public class BluetoothLeService extends Service {
     public final static String ACTION_GATT_CONNECTED = "br.com.mybaby.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED = "br.com.mybaby.bluetooth.le.ACTION_GATT_DISCONNECTED";
     public final static String ACTION_GATT_DISCONNECTED_DIALOGO = "br.com.mybaby.bluetooth.le.ACTION_GATT_DISCONNECTED_DIALOGO";
+    public final static String ACTION_GATT_DISCONNECTED_INTENCIONAL = "br.com.mybaby.bluetooth.le.ACTION_GATT_DISCONNECTED_INTENCIONAL";
     public final static String ACTION_GATT_SERVICES_DISCOVERED = "br.com.mybaby.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE = "br.com.mybaby.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA = "br.com.mybaby.bluetooth.le.EXTRA_DATA";
@@ -114,7 +115,9 @@ public class BluetoothLeService extends Service {
             	if(VisibilidadeManager.isMainActivityVisible() && !isDesconexaoIntencional()){
             		//MOSTRA O DIALOGO
             		intentAction = ACTION_GATT_DISCONNECTED_DIALOGO;
-            	} else {
+            	} else if(isDesconexaoIntencional()) {
+            		intentAction = ACTION_GATT_DISCONNECTED_INTENCIONAL;
+            	} else{
             		intentAction = ACTION_GATT_DISCONNECTED;
             	}
             	
@@ -129,7 +132,7 @@ public class BluetoothLeService extends Service {
             		
             		alarm.setAlarm(BluetoothLeService.this);
 
-            	}
+            	} 
             	
             	mConnectionState = STATE_DISCONNECTED;
             	Log.i(TAG, "Disconnected from GATT server.");
@@ -138,7 +141,7 @@ public class BluetoothLeService extends Service {
             	//VOLTA A BOOLEANA DE INTENCIONAL PARA FALSE
             	setDesconexaoIntencional(Boolean.FALSE);
             	
-            }
+            } 
             
         }
         

@@ -62,7 +62,7 @@ public class SMS {
 	
 	// Starts the timer according to the number of seconds the user specified.
 		private void startTimer() {
-			Log.d(Constantes.DEBUG_TAG, "Inicio timer SMS");
+			Log.d(TAG, "Inicio timer SMS");
 			
 			try {
 				int count = 1;

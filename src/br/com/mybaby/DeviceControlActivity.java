@@ -110,7 +110,7 @@ public class DeviceControlActivity extends Activity {
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
 
-            	mConnected = true;
+            	mConnected = false;
             	imagemStatus.setImageResource(R.drawable.aguardando);
                 updateConnectionState(R.string.aguardando);
 
@@ -129,12 +129,22 @@ public class DeviceControlActivity extends Activity {
                 }
                 
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                // Show all the supported services and characteristics on the user interface.
+            	mConnected = true;
             	updateConnectionState(R.string.conectado);
             	imagemStatus.setImageResource(R.drawable.conectado);
+            	
+            	invalidateOptionsMenu();
+            	
+            	// Show all the supported services and characteristics on the user interface.
                 //displayGattServices(mBluetoothLeService.getSupportedGattServices());
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+            } else if(BluetoothLeService.ACTION_GATT_DISCONNECTED_INTENCIONAL.equals(action)){
+            	mConnected = false;
+            	updateConnectionState(R.string.desconectado);
+            	imagemStatus.setImageResource(R.drawable.chorando);
+            	
+            	invalidateOptionsMenu();
             }
         }
     };
@@ -296,7 +306,7 @@ public class DeviceControlActivity extends Activity {
         }
         
         getActionBar().setTitle("MyBaby!");
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(false);
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         
@@ -336,8 +346,7 @@ public class DeviceControlActivity extends Activity {
         VisibilidadeManager.setMainActivityVisible(Boolean.TRUE);
         
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-        if (mBluetoothLeService != null) {
-        	setDesconexaoIntencional(Boolean.FALSE);
+        if (mBluetoothLeService != null  && !isDesconexaoIntencional) {
             final boolean result = mBluetoothLeService.connect(mDeviceAddress);
             Log.d(TAG, "Connect request result=" + result);
         }
@@ -368,6 +377,9 @@ public class DeviceControlActivity extends Activity {
         if (mConnected) {
             menu.findItem(R.id.menu_connect).setVisible(false);
             menu.findItem(R.id.menu_disconnect).setVisible(true);
+        } else if(!mConnected && !isDesconexaoIntencional()){
+        	menu.findItem(R.id.menu_connect).setVisible(false);
+            menu.findItem(R.id.menu_disconnect).setVisible(false);
         } else {
             menu.findItem(R.id.menu_connect).setVisible(true);
             menu.findItem(R.id.menu_disconnect).setVisible(false);
@@ -379,7 +391,14 @@ public class DeviceControlActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.menu_connect:
+            	setDesconexaoIntencional(Boolean.FALSE);
                 mBluetoothLeService.connect(mDeviceAddress);
+                
+                imagemStatus.setImageResource(R.drawable.aguardando);
+                updateConnectionState(R.string.aguardando);
+                
+                invalidateOptionsMenu();
+                
                 return true;
             case R.id.menu_disconnect:
             	setDesconexaoIntencional(Boolean.TRUE);
@@ -388,7 +407,7 @@ public class DeviceControlActivity extends Activity {
             case android.R.id.home:
             	//final Intent intent = new Intent(this, DeviceScanActivity.class);
             	//startActivity(intent);
-            	onBackPressed();
+            	//onBackPressed();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -475,6 +494,7 @@ public class DeviceControlActivity extends Activity {
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED_DIALOGO);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED_INTENCIONAL);
         
         return intentFilter;
     }

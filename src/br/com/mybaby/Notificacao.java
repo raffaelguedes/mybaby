@@ -43,7 +43,7 @@ public class Notificacao {
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.cancel(idNotificacao);
 		
-		Log.d(TAG, "UPDATE > Notificacao2 > cancelarNotificacao");
+		Log.d(TAG, "UPDATE > Notificacao > cancelarNotificacao");
 		sistemaDAO.update(Constantes.NOTIFICACAO_ATIVO, Boolean.FALSE.toString());
 
 	}
@@ -60,6 +60,7 @@ public class Notificacao {
 		Intent notifyIntent = new Intent(context, DeviceControlActivity.class);
 		
 		notifyIntent.putExtra(Constantes.NOTIFICACAO_ACTION_OK, Constantes.NOTIFICACAO_ACTION_OK);
+		
 		// Sets the Activity to start in a new, empty task
 		//notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		// Creates the PendingIntent
@@ -70,7 +71,7 @@ public class Notificacao {
 		        notifyIntent,
 		        PendingIntent.FLAG_UPDATE_CURRENT
 		);
-
+		
 		// Puts the PendingIntent into the notification builder
 		builder.setContentIntent(notifyPendingIntent);
 		
@@ -81,10 +82,10 @@ public class Notificacao {
 	
 	// Starts the timer according to the number of seconds the user specified.
 	private void startTimer() {
-		Log.d(Constantes.DEBUG_TAG, "Inicio timer notificação");
+		Log.d(TAG, "Inicio timer notificação");
 		
 		//ALTERA O VALOR NA BASE PARA TRUE(NOTIFICACAO ATIVA)
-		Log.d(TAG, "UPDATE > Notificacao2 > startTimer");
+		Log.d(TAG, "UPDATE > Notificacao > startTimer");
 		sistemaDAO.update(Constantes.NOTIFICACAO_ATIVO, Boolean.TRUE.toString());
 		
 		try {
@@ -93,7 +94,7 @@ public class Notificacao {
 			while (isContinuarEnviando() && count <= MAX_ENVIO && !isDispositivoConectadoSincronizado()) {
 				builder.setContentText(mensagens[count-1]);
 				issueNotification(builder);
-				Log.d(Constantes.DEBUG_TAG, "Notificação de número: " + count +" | "+ Util.getDataAtual());
+				Log.d(TAG, "Notificação de número: " + count +" | "+ Util.getDataAtual());
 				
 				if(count == (MAX_ENVIO/2)){
 					Thread.sleep(HUM_MINUTO);
@@ -104,21 +105,21 @@ public class Notificacao {
 			}
 			
 			if((isContinuarEnviando() || count >= MAX_ENVIO) && !isDispositivoConectadoSincronizado()){
-				houveRespostaDaNotificacaoEnviada = false;
 				//ESGOTOU OS ENVIOS E NÃO TEVE RESPOSTA
-				//RETORNAR....
+				houveRespostaDaNotificacaoEnviada = false;
 				
 			}
 			
 			if(!isContinuarEnviando() || isDispositivoConectadoSincronizado()){
 				cancelarNotificacao(Constantes.NOTIFICATION_ID);
+				
 			}
 
 		} catch (InterruptedException e) {
-			Log.d(Constantes.DEBUG_TAG, "Erro no timer de notificação");
+			Log.d(TAG, "Erro no timer de notificação");
 		}
 
-		Log.d(Constantes.DEBUG_TAG, "Finalizaou o timer de notificação");
+		Log.d(TAG, "Finalizaou o timer de notificação");
 	}
 	
 	private void issueNotification(NotificationCompat.Builder builder) {

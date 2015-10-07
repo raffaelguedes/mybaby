@@ -33,6 +33,8 @@
     <string name="menu_disconnect">Desconectar</string>
     <string name="menu_scan">Buscar</string>
     <string name="menu_stop">Parar</string>
+    <string name="menu_configuracao">Configuração</string>
+    
     
     <!-- NOTIFICACAO -->
     <string name="notificacao">MyBaby!</string>
@@ -52,8 +54,8 @@
     <string name="label_status">Status:</string>
     <string name="conectado">Conectado</string>
     <string name="conectado_explain">MyBaby! conectado e sincronizado.</string>
-    <string name="desconectado">Desconectado</string>
-    <string name="desconectado_explain">MyBaby! desconectado.</string>
+    <string name="desconectado">Desligado</string>
+    <string name="desconectado_explain">MyBaby! desconectado. A conexão deverá ocorrer manualmente.</string>
     <string name="aguardando">Aguardando</string>
     <string name="aguardando_explain">MyBaby! Fora do alcance. Mas assim que houver aproximação a conexão será automática.</string>
    
