@@ -18,6 +18,11 @@ package br.com.mybaby;
 
 import java.util.ArrayList;
 
+import br.com.mybaby.R;
+import br.com.mybaby.R.id;
+import br.com.mybaby.R.layout;
+import br.com.mybaby.R.menu;
+import br.com.mybaby.R.string;
 import br.com.mybaby.dao.SistemaDAO;
 import android.app.Activity;
 import android.app.ListActivity;
@@ -55,6 +60,10 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	 if (BuildConfig.DEBUG) {
+             // Enable strict mode checks when in debug modes
+             Util.enableStrictMode();
+         }
         super.onCreate(savedInstanceState);
         getActionBar().setTitle(R.string.title_devices);
         mHandler = new Handler();

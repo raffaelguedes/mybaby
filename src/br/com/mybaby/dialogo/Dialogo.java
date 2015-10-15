@@ -1,5 +1,9 @@
-package br.com.mybaby;
+package br.com.mybaby.dialogo;
 
+import br.com.mybaby.DeviceControlActivity;
+import br.com.mybaby.R;
+import br.com.mybaby.Util;
+import br.com.mybaby.R.drawable;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;

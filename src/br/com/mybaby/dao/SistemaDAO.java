@@ -45,6 +45,7 @@ public class SistemaDAO extends DAOHelper {
 			retorno = cursor.getString(cursor.getColumnIndex("valor"));
 			
 		}
+		cursor.close();
 		return retorno;
 	}
 

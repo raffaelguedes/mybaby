@@ -1,4 +1,4 @@
-package br.com.mybaby;
+package br.com.mybaby.notificacao;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -7,6 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import br.com.mybaby.Constantes;
+import br.com.mybaby.DeviceControlActivity;
+import br.com.mybaby.R;
+import br.com.mybaby.Util;
+import br.com.mybaby.R.drawable;
+import br.com.mybaby.R.string;
 import br.com.mybaby.dao.SistemaDAO;
 
 public class Notificacao {

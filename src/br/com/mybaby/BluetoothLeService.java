@@ -36,8 +36,12 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import br.com.mybaby.alarme.SampleAlarmReceiver;
 import br.com.mybaby.dao.LogDAO;
 import br.com.mybaby.dao.SistemaDAO;
+import br.com.mybaby.notificacao.Notificacao;
+import br.com.mybaby.sms.SMSEntregueReceiver;
+import br.com.mybaby.sms.SMSEnviadoReceiver;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a

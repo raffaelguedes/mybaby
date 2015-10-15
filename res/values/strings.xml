@@ -62,4 +62,14 @@
     
     <!-- TELA SCAN -->
     
+    <!-- TELA CONFIGURACAO -->
+    <string name="geral">Geral</string>
+    <string name="nome_baby">Nome MyBaby!</string>
+    <string name="sms">SMS</string>
+    <string name="sms_add_contato">Adicionar Contatos</string>
+    <string name="sms_explain">Escolha os contatos que o MyBaby! usará no caso de envio de SMS.</string>
+    
+    
+    
+    
 </resources>

@@ -37,6 +37,7 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application android:label="@string/app_name"
         android:icon="@drawable/mybaby"
@@ -53,7 +54,7 @@
         <activity android:name=".DeviceControlActivity"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
-            android:parentActivityName=".DeviceScanActivity">
+            android:parentActivityName="br.com.mybaby.DeviceScanActivity">
     			<meta-data
         			android:name="android.support.PARENT_ACTIVITY"
         			android:value=".DeviceScanActivity"/>
@@ -66,15 +67,52 @@
         
         <service android:name=".BluetoothLeService" android:enabled="true"/>
         
-        <receiver android:name=".SampleAlarmReceiver"></receiver>
+        <receiver android:name=".alarme.SampleAlarmReceiver"></receiver>
         
-        <receiver android:name=".SampleBootReceiver"
+        <receiver android:name=".alarme.SampleBootReceiver"
                 android:enabled="false">
             <intent-filter>
             <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
         </receiver>
-        <service android:name=".SampleSchedulingService" />
+        <service android:name=".alarme.SampleSchedulingService" />
+        
+        <!-- CONTATOS -->
+        <activity
+            android:name=".contatos.ContactsListActivity"
+            android:label="@string/activity_contacts_list"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" >
+            <!--
+                 Add intent-filter for search intent action and specify searchable configuration
+                 via meta-data tag. This allows this activity to receive search intents via the
+                 system hooks. In this sample this is only used on older OS versions (pre-Honeycomb)
+                 via the activity search dialog. See the Search API guide for more information:
+                 http://developer.android.com/guide/topics/search/search-dialog.html
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable_contacts" />
+        </activity>
+        
+        <activity
+            android:name=".contatos.ContactDetailActivity"
+            android:label="@string/activity_contact_detail"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".contatos.ContactsListActivity">
+            <!-- Define hierarchical parent of this activity, both via the system
+                 parentActivityName attribute (added in API Level 16) and via meta-data annotation.
+                 This allows use of the support library NavUtils class in a way that works over
+                 all Android versions. See the "Tasks and Back Stack" guide for more information:
+                 http://developer.android.com/guide/components/tasks-and-back-stack.html
+            -->
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                       android:value=".contatos.ContactsListActivity" />
+        </activity>
         
     </application>
 

@@ -40,8 +40,19 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
+import br.com.mybaby.R;
+import br.com.mybaby.BluetoothLeService.LocalBinder;
+import br.com.mybaby.R.drawable;
+import br.com.mybaby.R.id;
+import br.com.mybaby.R.layout;
+import br.com.mybaby.R.menu;
+import br.com.mybaby.R.string;
 import br.com.mybaby.dao.ConfiguracaoDAO;
 import br.com.mybaby.dao.SistemaDAO;
+import br.com.mybaby.dialogo.Dialogo;
+import br.com.mybaby.dialogo.NomeBabyDialogo;
+import br.com.mybaby.modelo.Configuracao;
+import br.com.mybaby.sms.SMSDialogo;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,
@@ -55,7 +66,6 @@ public class DeviceControlActivity extends Activity {
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
     public static final long TIMEOUT_DIALOGO = 1000*30; //1000 = 1 SEGUNDO
-    private final long TIMEOUT_DIALOGO_DOIS_MINUTOS = 60000*2;
 
     private ImageView imagemStatus;
     private TextView mConnectionExplain;
@@ -251,6 +261,10 @@ public class DeviceControlActivity extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	 if (BuildConfig.DEBUG) {
+             // Enable strict mode checks when in debug modes
+             Util.enableStrictMode();
+         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gatt_services_characteristics);
         
@@ -369,6 +383,7 @@ public class DeviceControlActivity extends Activity {
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
         sistemaDAO.close();
+        configuracaoDAO.close();
     }
 
     @Override
@@ -409,6 +424,10 @@ public class DeviceControlActivity extends Activity {
             	//startActivity(intent);
             	//onBackPressed();
                 return true;
+            case R.id.menu_configuracao:
+            	final Intent intent = new Intent(this, ConfiguracaoActivity.class);
+            	startActivity(intent);
+            	return true;
         }
         return super.onOptionsItemSelected(item);
     }
