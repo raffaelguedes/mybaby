@@ -24,6 +24,7 @@ import br.com.mybaby.R.layout;
 import br.com.mybaby.R.menu;
 import br.com.mybaby.R.string;
 import br.com.mybaby.dao.SistemaDAO;
+import br.com.mybaby.util.Util;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
@@ -118,6 +119,10 @@ public class DeviceScanActivity extends ListActivity {
             case R.id.menu_stop:
                 scanLeDevice(false);
                 break;
+            case R.id.menu_preferences:
+            	final Intent intent = new Intent(this, PreferencesActivity.class);
+            	startActivity(intent);
+            	return true;
         }
         return true;
     }

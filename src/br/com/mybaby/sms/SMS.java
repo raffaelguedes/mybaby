@@ -3,9 +3,9 @@ package br.com.mybaby.sms;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.mybaby.Constantes;
-import br.com.mybaby.Util;
 import br.com.mybaby.dao.SistemaDAO;
+import br.com.mybaby.util.Constantes;
+import br.com.mybaby.util.Util;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;

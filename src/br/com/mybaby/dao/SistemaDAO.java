@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
-import br.com.mybaby.Util;
+import br.com.mybaby.util.Util;
 
 public class SistemaDAO extends DAOHelper {
 

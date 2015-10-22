@@ -1,4 +1,4 @@
-package br.com.mybaby;
+package br.com.mybaby.util;
 
 public final class Constantes {
 
@@ -29,5 +29,8 @@ public final class Constantes {
     public static final String LOG_STATUS_CONECTADO = "Conectado";
     public static final String LOG_STATUS_DESCONECTADO = "Desconectado";
     public static final String LOG_STATUS_AGUARDANDO = "Aguardando";
+    
+    //PREFERENCIAS
+    public static final String EXTRA_TIPO_CONTATO = "EXTRA_TIPO_CONTATO";
     
 }

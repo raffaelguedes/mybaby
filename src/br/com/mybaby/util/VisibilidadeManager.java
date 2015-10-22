@@ -1,4 +1,4 @@
-package br.com.mybaby;
+package br.com.mybaby.util;
 
 public class VisibilidadeManager {
 	private static boolean isMainActivityVisible;

@@ -53,6 +53,9 @@ import br.com.mybaby.dialogo.Dialogo;
 import br.com.mybaby.dialogo.NomeBabyDialogo;
 import br.com.mybaby.modelo.Configuracao;
 import br.com.mybaby.sms.SMSDialogo;
+import br.com.mybaby.util.Constantes;
+import br.com.mybaby.util.Util;
+import br.com.mybaby.util.VisibilidadeManager;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,

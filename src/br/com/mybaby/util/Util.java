@@ -1,10 +1,12 @@
-package br.com.mybaby;
+package br.com.mybaby.util;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import br.com.mybaby.DeviceControlActivity;
+import br.com.mybaby.DeviceScanActivity;
 import br.com.mybaby.contatos.ContactsListActivity;
 import android.annotation.TargetApi;
 import android.os.Build;

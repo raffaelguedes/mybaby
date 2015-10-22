@@ -42,6 +42,8 @@ import br.com.mybaby.dao.SistemaDAO;
 import br.com.mybaby.notificacao.Notificacao;
 import br.com.mybaby.sms.SMSEntregueReceiver;
 import br.com.mybaby.sms.SMSEnviadoReceiver;
+import br.com.mybaby.util.Constantes;
+import br.com.mybaby.util.VisibilidadeManager;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a

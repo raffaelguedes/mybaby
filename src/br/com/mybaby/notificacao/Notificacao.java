@@ -7,13 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import br.com.mybaby.Constantes;
 import br.com.mybaby.DeviceControlActivity;
 import br.com.mybaby.R;
-import br.com.mybaby.Util;
 import br.com.mybaby.R.drawable;
 import br.com.mybaby.R.string;
 import br.com.mybaby.dao.SistemaDAO;
+import br.com.mybaby.util.Constantes;
+import br.com.mybaby.util.Util;
 
 public class Notificacao {
 	private final static String TAG = Notificacao.class.getSimpleName();
