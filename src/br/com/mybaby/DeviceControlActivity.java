@@ -30,8 +30,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,18 +42,9 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
-import br.com.mybaby.R;
-import br.com.mybaby.BluetoothLeService.LocalBinder;
-import br.com.mybaby.R.drawable;
-import br.com.mybaby.R.id;
-import br.com.mybaby.R.layout;
-import br.com.mybaby.R.menu;
-import br.com.mybaby.R.string;
-import br.com.mybaby.dao.ConfiguracaoDAO;
 import br.com.mybaby.dao.SistemaDAO;
 import br.com.mybaby.dialogo.Dialogo;
-import br.com.mybaby.dialogo.NomeBabyDialogo;
-import br.com.mybaby.modelo.Configuracao;
+import br.com.mybaby.preferences.PreferencesActivity;
 import br.com.mybaby.sms.SMSDialogo;
 import br.com.mybaby.util.Constantes;
 import br.com.mybaby.util.Util;
@@ -84,7 +77,7 @@ public class DeviceControlActivity extends Activity {
     private boolean isDesconexaoIntencional = false;
     private BluetoothGattCharacteristic mNotifyCharacteristic;
     private SistemaDAO sistemaDAO;
-    private ConfiguracaoDAO configuracaoDAO;
+    private SharedPreferences sharedPref;
     
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
@@ -210,23 +203,6 @@ public class DeviceControlActivity extends Activity {
         newFragment.show(DeviceControlActivity.this.getFragmentManager(), SMSDialogo.EXTRAS_DIALOGO_SMS);
     }
     
-    public void onOkClickDialogoNomeBaby(String nome){
-    	
-    	if(nome == null || nome.equals("")){
-    		nome = "MyBaby!";
-    	}
-    	Configuracao configuracao = new Configuracao();
-    	configuracao.setNomeMyBaby(nome.trim());
-    	configuracaoDAO.inserir(configuracao);
-    	
-    	getActionBar().setTitle(configuracao.getNomeMyBaby());
-    }
-    
-    private void mostrarDialogoNomeBaby(){
-    	final DialogFragment newFragment = new NomeBabyDialogo();
-        newFragment.show(DeviceControlActivity.this.getFragmentManager(), NomeBabyDialogo.EXTRAS_DIALOGO_NOME_BABY);
-    }
-    
     // If a given GATT characteristic is selected, check for supported features.  This sample
     // demonstrates 'Read' and 'Notify' features.  See
     // http://d.android.com/reference/android/bluetooth/BluetoothGatt.html for the complete
@@ -272,7 +248,8 @@ public class DeviceControlActivity extends Activity {
         setContentView(R.layout.gatt_services_characteristics);
         
         sistemaDAO = new SistemaDAO(this);
-        configuracaoDAO = new ConfiguracaoDAO(this);
+        
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         
         final Intent intent = getIntent();
         
@@ -311,18 +288,12 @@ public class DeviceControlActivity extends Activity {
         	mDeviceAddress = dispositivoEnderecoBase;
         }
         
-        Configuracao configuracao = configuracaoDAO.getConfiguracao();
-        
-        if(configuracao == null || configuracao.getNomeMyBaby().equals("")){
-        	mostrarDialogoNomeBaby();
-        }else{
-        	//PARA TESTE. RETIRAR QUANDO ESTIVER OK
-        	configuracao.setNomeMyBaby("");
-        	configuracaoDAO.update(configuracao);
-        	mostrarDialogoNomeBaby();
+        if(sharedPref.getString(Constantes.NOME_MYBABY, "")==""){
+        	getActionBar().setTitle("MyBaby!");
+        } else{
+        	getActionBar().setTitle(sharedPref.getString(Constantes.NOME_MYBABY, ""));
         }
         
-        getActionBar().setTitle("MyBaby!");
         getActionBar().setDisplayHomeAsUpEnabled(false);
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -386,7 +357,6 @@ public class DeviceControlActivity extends Activity {
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
         sistemaDAO.close();
-        configuracaoDAO.close();
     }
 
     @Override
@@ -428,7 +398,7 @@ public class DeviceControlActivity extends Activity {
             	//onBackPressed();
                 return true;
             case R.id.menu_configuracao:
-            	final Intent intent = new Intent(this, ConfiguracaoActivity.class);
+            	final Intent intent = new Intent(this, PreferencesActivity.class);
             	startActivity(intent);
             	return true;
         }

@@ -17,24 +17,21 @@
 package br.com.mybaby;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import br.com.mybaby.R;
-import br.com.mybaby.R.id;
-import br.com.mybaby.R.layout;
-import br.com.mybaby.R.menu;
-import br.com.mybaby.R.string;
-import br.com.mybaby.dao.SistemaDAO;
-import br.com.mybaby.util.Util;
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,6 +41,12 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import br.com.mybaby.dao.ContatoDAO;
+import br.com.mybaby.dao.SistemaDAO;
+import br.com.mybaby.dialogo.PreferencesDialogo;
+import br.com.mybaby.modelo.Contato;
+import br.com.mybaby.util.Constantes;
+import br.com.mybaby.util.Util;
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
@@ -54,6 +57,8 @@ public class DeviceScanActivity extends ListActivity {
     private boolean mScanning;
     private Handler mHandler;
     private SistemaDAO sistemaDAO;
+    private SharedPreferences sharedPref;
+    private ContatoDAO contatoDAO;
 
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
@@ -70,7 +75,9 @@ public class DeviceScanActivity extends ListActivity {
         mHandler = new Handler();
         
         sistemaDAO = new SistemaDAO(this);
-
+        contatoDAO = new ContatoDAO(this);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -93,7 +100,7 @@ public class DeviceScanActivity extends ListActivity {
         
     }
 
-    @Override
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         if (!mScanning) {
@@ -119,10 +126,6 @@ public class DeviceScanActivity extends ListActivity {
             case R.id.menu_stop:
                 scanLeDevice(false);
                 break;
-            case R.id.menu_preferences:
-            	final Intent intent = new Intent(this, PreferencesActivity.class);
-            	startActivity(intent);
-            	return true;
         }
         return true;
     }
@@ -162,19 +165,65 @@ public class DeviceScanActivity extends ListActivity {
         scanLeDevice(false);
         mLeDeviceListAdapter.clear();
     }
+    
+    @Override
+    protected void onDestroy() {
+    	// TODO Auto-generated method stub
+    	super.onDestroy();
+    	contatoDAO.close();
+    	sistemaDAO.close();
+    }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-        if (device == null) return;
-        final Intent intent = new Intent(this, DeviceControlActivity.class);
-        intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());
-        intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress());
-        if (mScanning) {
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-            mScanning = false;
-        }
-        startActivity(intent);
+    	if(initSistema()){
+    		final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
+    		if (device == null) return;
+    		final Intent intent = new Intent(this, DeviceControlActivity.class);
+    		intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());
+    		intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress());
+    		if (mScanning) {
+    			mBluetoothAdapter.stopLeScan(mLeScanCallback);
+    			mScanning = false;
+    		}
+    		startActivity(intent);
+    	}
+
+    }
+    
+    private boolean initSistema() {
+		List<Contato> contatosTelefone = contatoDAO.getContatos(Contato.CONTATO_TIPO_TELEFONE);
+		List<Contato> contatosSMS = contatoDAO.getContatos(Contato.CONTATO_TIPO_SMS);
+		String emailPrincipal = sharedPref.getString(Constantes.EMAIL_PRINCIPAL, "");
+		String mensagem =" \n MyBaby! Necessita de algumas configurações para iniciar. \n";
+		boolean temMensagem = false;
+		
+		if(contatosTelefone.isEmpty()){
+			mensagem += " - Telefone \n";
+			temMensagem = true;
+		}
+
+		if(contatosSMS.isEmpty()){
+			mensagem += " - SMS \n";
+			temMensagem = true;
+		}
+
+		if(emailPrincipal.equals("")){
+			mensagem  += " - Email \n";
+			temMensagem = true;
+		}
+		
+		if(temMensagem){
+			mostrarDialogoPreferences(mensagem);
+			return false;
+		}
+		return true;
+		
+	}
+    
+    private void mostrarDialogoPreferences(String mensagem){
+    	final DialogFragment newFragment = new PreferencesDialogo(mensagem);
+        newFragment.show(DeviceScanActivity.this.getFragmentManager(), PreferencesDialogo.EXTRAS_DIALOGO_PREFERENCES);
     }
 
     private void scanLeDevice(final boolean enable) {

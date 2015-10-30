@@ -1,6 +1,9 @@
 package br.com.mybaby.util;
 
 public final class Constantes {
+	
+	//SISTEMA
+	public static final String SISTEMA_OK = "SISTEMA_OK";
 
 	//ALERTA
 	public static final String KEEP_ENVIO_ALERTA = "KEEP_ENVIO_ALERTA";
@@ -32,5 +35,8 @@ public final class Constantes {
     
     //PREFERENCIAS
     public static final String EXTRA_TIPO_CONTATO = "EXTRA_TIPO_CONTATO";
+    public static final String NOME_MYBABY = "nomeMyBaby";
+    public static final String EMAIL_PRINCIPAL = "email1";
+    public static final String EMAIL_SECUNDARIO = "email2";
     
 }

@@ -35,18 +35,24 @@ public class SistemaDAO extends DAOHelper {
 	}
 	
 	public String getValor(String chave){
-		String[] args = {chave};
-		String sql = "SELECT * FROM " + TABELA_SISTEMA +" where chave=?;";
-		
-		Cursor cursor = getReadableDatabase().rawQuery(sql, args);
-		
-		String retorno = null;
-		while(cursor.moveToNext()){
-			retorno = cursor.getString(cursor.getColumnIndex("valor"));
-			
+		Cursor cursor = null;
+		try{
+			String[] args = {chave};
+			String sql = "SELECT * FROM " + TABELA_SISTEMA +" where chave=?;";
+
+			cursor = getReadableDatabase().rawQuery(sql, args);
+
+			String retorno = null;
+			while(cursor.moveToNext()){
+				retorno = cursor.getString(cursor.getColumnIndex("valor"));
+
+			}
+			return retorno;
+		}finally{
+			if(cursor!=null){
+				cursor.close();
+			}
 		}
-		cursor.close();
-		return retorno;
 	}
 
 }

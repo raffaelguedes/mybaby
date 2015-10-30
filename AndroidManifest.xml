@@ -15,80 +15,89 @@
  limitations under the License.
 -->
 
-
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="br.com.mybaby"
     android:versionCode="1"
-    android:versionName="1.0">
+    android:versionName="1.0" >
 
     <!-- Min/target SDK versions (<uses-sdk>) managed by build.gradle -->
-    
-    <!-- Declare this required feature if you want to make the app available to BLE-capable
+
+
+    <!--
+    Declare this required feature if you want to make the app available to BLE-capable
     devices only.  If you want to make your app available to devices that don't support BLE,
     you should omit this in the manifest.  Instead, determine BLE capability by using
-    PackageManager.hasSystemFeature(FEATURE_BLUETOOTH_LE) -->
-    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
+    PackageManager.hasSystemFeature(FEATURE_BLUETOOTH_LE)
+    -->
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
 
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.SEND_SMS"/>
-    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
-    <application android:label="@string/app_name"
+    <application
         android:icon="@drawable/mybaby"
-        android:theme="@android:style/Theme.DeviceDefault.Light">
-        <activity android:name=".DeviceScanActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.DeviceDefault.Light" >
+        <activity
+            android:name=".DeviceScanActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         
-        <activity android:name=".DeviceControlActivity"
-            android:screenOrientation="portrait"
+        <activity
+            android:name=".DeviceControlActivity"
             android:launchMode="singleTask"
-            android:parentActivityName="br.com.mybaby.DeviceScanActivity">
-    			<meta-data
-        			android:name="android.support.PARENT_ACTIVITY"
-        			android:value=".DeviceScanActivity"/>
-		</activity>
-		
-        <activity android:name=".ConfiguracaoActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan">
-            
-		</activity>
-		
-         <activity android:name=".PreferencesActivity"
-            android:screenOrientation="portrait">
-            
-		</activity>
+            android:parentActivityName="br.com.mybaby.DeviceScanActivity"
+            android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".DeviceScanActivity" />
+        </activity>
         
-        <service android:name=".BluetoothLeService" android:enabled="true"/>
-        
-        <receiver android:name=".alarme.SampleAlarmReceiver"></receiver>
-        
-        <receiver android:name=".alarme.SampleBootReceiver"
-                android:enabled="false">
+        <activity
+            android:label="@string/titulo_config"
+            android:name=".preferences.PreferencesActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+
+        <service
+            android:name=".BluetoothLeService"
+            android:enabled="true" />
+
+        <receiver android:name=".alarme.SampleAlarmReceiver" >
+        </receiver>
+       
+        <receiver
+            android:name=".alarme.SampleBootReceiver"
+            android:enabled="false" >
             <intent-filter>
-            <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+                <action android:name="android.intent.action.BOOT_COMPLETED" >
+                </action>
             </intent-filter>
         </receiver>
+
         <service android:name=".alarme.SampleSchedulingService" />
-        
+
         <!-- CONTATOS -->
         <activity
             android:name=".contatos.ContactsListActivity"
             android:label="@string/activity_contacts_list"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" >
+
             <!--
                  Add intent-filter for search intent action and specify searchable configuration
                  via meta-data tag. This allows this activity to receive search intents via the
@@ -104,22 +113,23 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable_contacts" />
         </activity>
-        
         <activity
             android:name=".contatos.ContactDetailActivity"
             android:label="@string/activity_contact_detail"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".contatos.ContactsListActivity">
-            <!-- Define hierarchical parent of this activity, both via the system
+            android:parentActivityName=".contatos.ContactsListActivity"
+            android:screenOrientation="portrait" >
+
+            <!--
+                 Define hierarchical parent of this activity, both via the system
                  parentActivityName attribute (added in API Level 16) and via meta-data annotation.
                  This allows use of the support library NavUtils class in a way that works over
                  all Android versions. See the "Tasks and Back Stack" guide for more information:
                  http://developer.android.com/guide/components/tasks-and-back-stack.html
             -->
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value=".contatos.ContactsListActivity" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".contatos.ContactsListActivity" />
         </activity>
-        
     </application>
 
 </manifest>
