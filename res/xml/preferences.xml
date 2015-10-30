@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <EditTextPreference
+        android:key="nomeMyBaby"
+        android:summary="Personalize com o nome do seu bebê."
+        android:title="Nome MyBaby!" >
+    </EditTextPreference>
+
+    <Preference
+        android:summary="Selecione os contatos para o envio de SMS."
+        android:title="SMS" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="br.com.mybaby.contatos.ContactsListActivity"
+            android:targetPackage="br.com.mybaby" >
+            <extra
+                android:name="EXTRA_TIPO_CONTATO"
+                android:value="SMS" />
+        </intent>
+    </Preference>
+
+        <Preference
+        android:summary="Selecione os contatos para a ligação."
+        android:title="Telefone" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="br.com.mybaby.contatos.ContactsListActivity"
+            android:targetPackage="br.com.mybaby" >
+            <extra
+                android:name="EXTRA_TIPO_CONTATO"
+                android:value="TEL" />
+        </intent>
+    </Preference>
+    
+    <EditTextPreference
+        android:key="email1"
+        android:summary="Digite o endereço de email para envio em caso de emergência."
+        android:title="Email Principal" >
+    </EditTextPreference>
+    
+    <EditTextPreference
+        android:key="email2"
+        android:summary="Digite o endereço de email secundário."
+        android:title="Email Secundário" >
+    </EditTextPreference>
+
+</PreferenceScreen>
