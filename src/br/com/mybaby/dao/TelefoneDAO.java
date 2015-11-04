@@ -18,6 +18,7 @@ public class TelefoneDAO extends DAOHelper {
 	
 	public void inserir(Telefone telefone){
         getWritableDatabase().insert(TABELA_TELEFONE, null, toValues(telefone));
+        close();
 	}
 	
 	
@@ -57,6 +58,7 @@ public class TelefoneDAO extends DAOHelper {
 			if(cursor!=null){
 				cursor.close();
 			}
+			close();
 		}
 	}
 	
@@ -83,6 +85,7 @@ public class TelefoneDAO extends DAOHelper {
 			if(cursor != null){
 				cursor.close();
 			}
+			close();
 		}
 	}
 	
@@ -92,11 +95,13 @@ public class TelefoneDAO extends DAOHelper {
 		String[] args = {telefone.getId().toString()};
 		
 		getWritableDatabase().update(TABELA_TELEFONE, values, "id=?", args);
+		close();
 	}
 	
 	public void deletar(Integer contatoID){
 		String[] args = {contatoID.toString()};
         getWritableDatabase().delete(TABELA_TELEFONE, "contato=?", args);
+        close();
 	}
 
 }

@@ -17,49 +17,73 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import br.com.mybaby.util.Constantes;
+
 public class EmailService extends Authenticator {
 	private String mailhost = "smtp.gmail.com";   
-	private String user;   
-	private String password;   
 	private Session session;   
+	private String assunto;
+	private String corpo;
+	private String remetente;
+	private String destinatario;
+	private SharedPreferences sharedPref;
 
 	static {   
 		Security.addProvider(new JSSEProvider());   
 	}  
 
-	public EmailService(String user, String password) {   
-		this.user = user;   
-		this.password = password;   
+	public EmailService(final String user, final String password, Context context) {   
 
+		
+		sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+		preencheDadosEmail();
+		
 		Properties props = new Properties();   
 		props.setProperty("mail.transport.protocol", "smtp");   
 		props.setProperty("mail.host", mailhost);   
 		props.put("mail.smtp.auth", "true");   
 		props.put("mail.smtp.port", "465");   
 		props.put("mail.smtp.socketFactory.port", "465");   
-		props.put("mail.smtp.socketFactory.class",   
-				"javax.net.ssl.SSLSocketFactory");   
+		props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");   
 		props.put("mail.smtp.socketFactory.fallback", "false");   
 		props.setProperty("mail.smtp.quitwait", "false");   
 
-		session = Session.getDefaultInstance(props, this);   
+		session = Session.getInstance(props, new javax.mail.Authenticator() {
+		    protected PasswordAuthentication getPasswordAuthentication() {
+		        return new PasswordAuthentication(user, password);
+		    }
+		});
+		
 	}   
 
-	protected PasswordAuthentication getPasswordAuthentication() {   
-		return new PasswordAuthentication(user, password);   
-	}   
 
-	public synchronized void sendMail(String subject, String body, String sender, String recipients) throws Exception {   
+	private void preencheDadosEmail() {
+		this.assunto = "Alerta MyBaby!";
+		this.corpo = "MyBaby! Mensagem automática de emergência! Entre em contato!";
+		this.remetente = "MyBaby@MyBaby.com.br";
+
+		destinatario = sharedPref.getString(Constantes.EMAIL_PRINCIPAL, "");
+
+		if(sharedPref.getString(Constantes.EMAIL_SECUNDARIO, "")!=null){
+			destinatario += ", " + sharedPref.getString(Constantes.EMAIL_SECUNDARIO, "");
+		}
+	}
+
+
+	public synchronized void sendMail() throws Exception {   
 		try{
 			MimeMessage message = new MimeMessage(session);   
-			DataHandler handler = new DataHandler(new ByteArrayDataSource(body.getBytes(), "text/plain"));   
-			message.setSender(new InternetAddress(sender));   
-			message.setSubject(subject);   
+			DataHandler handler = new DataHandler(new ByteArrayDataSource(corpo.getBytes(), "text/plain"));   
+			message.setSender(new InternetAddress(remetente));   
+			message.setSubject(assunto);   
 			message.setDataHandler(handler);   
-			if (recipients.indexOf(',') > 0)   
-				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipients));   
+			if (destinatario.indexOf(',') > 0)   
+				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));   
 			else  
-				message.setRecipient(Message.RecipientType.TO, new InternetAddress(recipients));   
+				message.setRecipient(Message.RecipientType.TO, new InternetAddress(destinatario));   
 			Transport.send(message);   
 		}catch(Exception e){
 			e.printStackTrace();

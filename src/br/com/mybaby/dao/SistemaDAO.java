@@ -21,6 +21,7 @@ public class SistemaDAO extends DAOHelper {
 		values.put("data", Util.getDataAtual());
 		
         getWritableDatabase().insert(TABELA_SISTEMA, null, values);
+        close();
 	}
 	
 	public void update(String chave, String valor){
@@ -32,6 +33,7 @@ public class SistemaDAO extends DAOHelper {
 		
 		String[] args = {chave};
 		getWritableDatabase().update(TABELA_SISTEMA, values, "chave=?", args);
+		close();
 	}
 	
 	public String getValor(String chave){
@@ -52,6 +54,7 @@ public class SistemaDAO extends DAOHelper {
 			if(cursor!=null){
 				cursor.close();
 			}
+			close();
 		}
 	}
 

@@ -30,6 +30,7 @@ public class ContatoDAO extends DAOHelper {
     		  telefoneDAO.inserir(telefone);
     	  }
       }
+      close();
        
 	}
 	
@@ -68,6 +69,7 @@ public class ContatoDAO extends DAOHelper {
 			if(cursor!=null){
 				cursor.close();
 			}
+			close();
 		}
 	}
 	
@@ -98,29 +100,31 @@ public class ContatoDAO extends DAOHelper {
 			if(cursor!=null){
 				cursor.close();
 			}
+			close();
 		}
 	}
 	
 	public void update(Contato contato){
 		ContentValues values = toValues(contato);		
-		
+
 		String[] args = {contato.getId().toString()};
-		
+
 		int rows = getWritableDatabase().update(TABELA_CONTATO, values, "id=?", args);
-		
+
 		if(rows > 0){
-	    	  telefoneDAO.deletar(contato.getId());
-	    	  for(Telefone telefone : contato.getTelefones()){
-	    		  telefone.setContatoId(contato.getId());
-	    		  telefoneDAO.inserir(telefone);
-	    	  }
-	      }
-		
+			telefoneDAO.deletar(contato.getId());
+			for(Telefone telefone : contato.getTelefones()){
+				telefone.setContatoId(contato.getId());
+				telefoneDAO.inserir(telefone);
+			}
+		}
+		close();
 	}
 	
 	public void delete(Contato contato){
 		String[] args = {contato.getId().toString()};
 		getWritableDatabase().delete(TABELA_CONTATO, "id=?", args);
+		close();
 	}
 	
 	
