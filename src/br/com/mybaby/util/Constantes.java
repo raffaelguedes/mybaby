@@ -39,4 +39,9 @@ public final class Constantes {
     public static final String EMAIL_PRINCIPAL = "email1";
     public static final String EMAIL_SECUNDARIO = "email2";
     
+    //ALARME
+    public static final String ALARME_ALERTAS = "ALARME_ALERTAS";
+    public static final String ALARME_CONNECT = "ALARME_CONNECT";
+    public static final String ALARME_EXTRA_VAMOS_ACORDAR = "ALARME_EXTRA_VAMOS_ACORDAR";
+    
 }

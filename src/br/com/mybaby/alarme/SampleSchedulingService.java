@@ -44,7 +44,6 @@ public class SampleSchedulingService extends IntentService {
     	//ENVIA AS NOTIFICAÇÕES
     	if(!notificacao.enviarNotificacao()){
     		//AGORA FUDEU...NÃO TEVE RESPOSTA EM NENHUMA DAS NOTIFICAÇÕES
-    		//TENTATIVA DE RECONECTAR AO DISPOSITIVO
     		Log.i(TAG, "Sem resposta aos envios de Notificação.");
     		Log.i(TAG, "Os SMS serão enviados.");
 
@@ -54,6 +53,7 @@ public class SampleSchedulingService extends IntentService {
     			
     			//ENVIANDO OS EMAILS
     	    	if(isOnline()){
+    	    		Log.i(TAG, "Enviando emails.");
     	    		EmailService emailService = new EmailService("raffa3lgu3d3s@gmail.com", "HardCore1983", this);
     	    		try {
     	    			emailService.sendMail();

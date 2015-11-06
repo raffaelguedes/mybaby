@@ -1,15 +1,14 @@
 package br.com.mybaby.dialogo;
 
-import br.com.mybaby.DeviceControlActivity;
-import br.com.mybaby.R;
-import br.com.mybaby.R.drawable;
-import br.com.mybaby.util.Util;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
+import br.com.mybaby.DeviceControlActivity;
+import br.com.mybaby.R;
+import br.com.mybaby.util.Util;
 
 
 public class Dialogo extends DialogFragment {
@@ -23,6 +22,7 @@ public class Dialogo extends DialogFragment {
 		// Use the Builder class for convenient dialog construction
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setMessage("\n\n		MyBaby! Em segurança! \n\n")
+		.setTitle("Info MyBaby!")
 		.setIcon(R.drawable.mybaby)
 		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {

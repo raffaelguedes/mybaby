@@ -3,6 +3,7 @@ package br.com.mybaby.alarme;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import br.com.mybaby.util.Constantes;
 
 /**
  * This BroadcastReceiver automatically (re)starts the alarm when the device is
@@ -18,7 +19,7 @@ public class SampleBootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED"))
         {
-            alarm.setAlarm(context);
+            alarm.setAlarm(context, Constantes.ALARME_ALERTAS, null);
         }
     }
 }

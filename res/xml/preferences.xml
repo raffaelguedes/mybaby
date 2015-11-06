@@ -36,13 +36,15 @@
     <EditTextPreference
         android:key="email1"
         android:summary="Digite o endereço de email para envio em caso de emergência."
-        android:title="Email Principal" >
+        android:title="Email Principal"
+        android:inputType="textEmailAddress" >
     </EditTextPreference>
     
     <EditTextPreference
         android:key="email2"
         android:summary="Digite o endereço de email secundário."
-        android:title="Email Secundário" >
+        android:title="Email Secundário" 
+        android:inputType="textEmailAddress" >
     </EditTextPreference>
 
 </PreferenceScreen>

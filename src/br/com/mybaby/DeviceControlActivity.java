@@ -42,7 +42,9 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
+import br.com.mybaby.alarme.SampleAlarmReceiver;
 import br.com.mybaby.dao.SistemaDAO;
+import br.com.mybaby.dialogo.DesconexaoDialogo;
 import br.com.mybaby.dialogo.Dialogo;
 import br.com.mybaby.preferences.PreferencesActivity;
 import br.com.mybaby.sms.SMSDialogo;
@@ -78,6 +80,7 @@ public class DeviceControlActivity extends Activity {
     private BluetoothGattCharacteristic mNotifyCharacteristic;
     private SistemaDAO sistemaDAO;
     private SharedPreferences sharedPref;
+    SampleAlarmReceiver alarm = new SampleAlarmReceiver();
     
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
@@ -201,6 +204,11 @@ public class DeviceControlActivity extends Activity {
     private void mostrarDialogoSMS(){
     	final DialogFragment newFragment = new SMSDialogo();
         newFragment.show(DeviceControlActivity.this.getFragmentManager(), SMSDialogo.EXTRAS_DIALOGO_SMS);
+    }
+    
+    private void mostrarDialogoDesconexao(){
+    	final DialogFragment newFragment = new DesconexaoDialogo();
+        newFragment.show(DeviceControlActivity.this.getFragmentManager(), DesconexaoDialogo.EXTRAS_DESCONEXAO_DIALOGO);
     }
     
     // If a given GATT characteristic is selected, check for supported features.  This sample
@@ -341,6 +349,21 @@ public class DeviceControlActivity extends Activity {
         
         invalidateOptionsMenu();
     }
+    
+    @Override
+    protected void onNewIntent(Intent intent) {
+    	// TODO Auto-generated method stub
+    	super.onNewIntent(intent);
+
+    	//ALARME
+    	if(intent.getStringExtra(Constantes.ALARME_EXTRA_VAMOS_ACORDAR)!=null){
+    		setDesconexaoIntencional(Boolean.FALSE);
+    		mBluetoothLeService.connect(mDeviceAddress);
+
+    		imagemStatus.setImageResource(R.drawable.aguardando);
+    		updateConnectionState(R.string.aguardando);
+    	}
+    }
 
     @Override
     protected void onPause() {
@@ -387,10 +410,13 @@ public class DeviceControlActivity extends Activity {
                 
                 invalidateOptionsMenu();
                 
+                alarm.cancelAlarm(this);
+                
                 return true;
             case R.id.menu_disconnect:
             	setDesconexaoIntencional(Boolean.TRUE);
-                mBluetoothLeService.disconnect();
+            	mostrarDialogoDesconexao();
+                
                 return true;
             case android.R.id.home:
             	//final Intent intent = new Intent(this, DeviceScanActivity.class);
@@ -403,6 +429,12 @@ public class DeviceControlActivity extends Activity {
             	return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    public void desconectar(String tempo){
+      mBluetoothLeService.disconnect();
+      
+      alarm.setAlarm(this, Constantes.ALARME_CONNECT, tempo);
     }
 
     private void updateConnectionState(final int resourceId) {

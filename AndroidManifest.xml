@@ -92,6 +92,8 @@
         </receiver>
 
         <service android:name=".alarme.SampleSchedulingService" />
+        
+        <service android:name=".alarme.ConnectSchedulingService" />
 
         <!-- CONTATOS -->
         <activity
