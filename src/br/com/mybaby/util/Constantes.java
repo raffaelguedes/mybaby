@@ -2,9 +2,6 @@ package br.com.mybaby.util;
 
 public final class Constantes {
 	
-	//SISTEMA
-	public static final String SISTEMA_OK = "SISTEMA_OK";
-
 	//ALERTA
 	public static final String KEEP_ENVIO_ALERTA = "KEEP_ENVIO_ALERTA";
 	
@@ -40,8 +37,11 @@ public final class Constantes {
     public static final String EMAIL_SECUNDARIO = "email2";
     
     //ALARME
+    public static final String ALARME_ALERTAS_BOOT = "ALARME_ALERTAS_BOOT";
     public static final String ALARME_ALERTAS = "ALARME_ALERTAS";
     public static final String ALARME_CONNECT = "ALARME_CONNECT";
     public static final String ALARME_EXTRA_VAMOS_ACORDAR = "ALARME_EXTRA_VAMOS_ACORDAR";
+    public static final String ALARME_CONNECT_TEMPO = "ALARME_CONNECT_TEMPO";
+    public static final String ALARME_CONNECT_HORARIO = "ALARME_CONNECT_HORARIO";
     
 }

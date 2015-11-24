@@ -1,7 +1,9 @@
 package br.com.mybaby.modelo;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 
 public class Contato {
@@ -70,6 +72,26 @@ public class Contato {
 		this.tipo = tipo;
 	}
 	
-	
+	 public static void main(String[] args) {  
+	        // Data inicial  
+	        java.text.DateFormat dfo = new java.text.SimpleDateFormat("HH:mm:ss.SSS");  
+	        Calendar dataInicio = Calendar.getInstance();  
+	      
+	        for (int i = 0; i < 20000; i++) {  
+	            System.out.println("teste");  
+	        }  
+	      
+	        // Data final  
+	        Calendar dataFinal = Calendar.getInstance();  
+	        //long df = System.currentTimeMillis();  
+	        long diferenca = dataFinal.getTimeInMillis() - dataFinal.getTimeInMillis();  
+	        long diferenca1 = dataFinal.getTimeInMillis() - dataInicio.getTimeInMillis();  
+	        System.out.println("diferenca ---> " + diferenca);  
+	        //formato UTC do TimeZone - resolveu  
+	        dfo.setTimeZone(TimeZone.getTimeZone("UTC"));  
+	      
+	        System.out.println("Diferenca: " + dfo.format(diferenca));  
+	        System.out.println("Diferenca: " + dfo.format(diferenca1));  
+	    }  
 
 }

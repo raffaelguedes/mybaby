@@ -75,15 +75,23 @@
             android:screenOrientation="portrait" >
         </activity>
 
-        <service
-            android:name=".BluetoothLeService"
-            android:enabled="true" />
+        <service android:name=".BluetoothLeService" android:enabled="true" />
 
-        <receiver android:name=".alarme.SampleAlarmReceiver" >
-        </receiver>
+        <receiver android:name=".alarme.SampleAlarmReceiver" />
+        
+        <receiver android:name=".alarme.ConnectAlarmReceiver" />
        
         <receiver
             android:name=".alarme.SampleBootReceiver"
+            android:enabled="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" >
+                </action>
+            </intent-filter>
+        </receiver>
+        
+        <receiver
+            android:name=".alarme.ConnectBootReceiver"
             android:enabled="false" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" >

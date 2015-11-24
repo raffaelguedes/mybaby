@@ -136,7 +136,7 @@ public class BluetoothLeService extends Service {
         		    mensagemEntregue = new SMSEntregueReceiver(BluetoothLeService.this);
         		    BluetoothLeService.this.registerReceiver(mensagemEntregue, new IntentFilter(Constantes.SMS_ENTREGUE));
             		
-            		alarm.setAlarm(BluetoothLeService.this, Constantes.ALARME_ALERTAS, null);
+            		alarm.setAlarm(BluetoothLeService.this);
 
             	} 
             	

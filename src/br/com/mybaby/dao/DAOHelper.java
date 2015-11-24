@@ -33,7 +33,7 @@ public class DAOHelper extends SQLiteOpenHelper {
 		db.execSQL("INSERT INTO " + TABELA_SISTEMA + " (chave, valor, data) values('" + Constantes.SMS_ENVIADO + "', 'false', '');");
 		db.execSQL("INSERT INTO " + TABELA_SISTEMA + " (chave, valor, data) values('" + Constantes.SMS_ENTREGUE + "', 'false', '');");
 		db.execSQL("INSERT INTO " + TABELA_SISTEMA + " (chave, valor, data) values('" + Constantes.DISPOSITIVO_CONECTADO_SINCRONIZADO + "', 'false', '');");
-		db.execSQL("INSERT INTO " + TABELA_SISTEMA + " (chave, valor, data) values('" + Constantes.SISTEMA_OK + "', 'false', '');");
+		db.execSQL("INSERT INTO " + TABELA_SISTEMA + " (chave, valor, data) values('" + Constantes.ALARME_ALERTAS_BOOT + "', 'false', '');");
 		
 		
 		db.execSQL(CREATE_TABLE_LOG);

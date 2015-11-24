@@ -1,9 +1,10 @@
 package br.com.mybaby.alarme;
 
+import br.com.mybaby.dao.SistemaDAO;
+import br.com.mybaby.util.Constantes;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import br.com.mybaby.util.Constantes;
 
 /**
  * This BroadcastReceiver automatically (re)starts the alarm when the device is
@@ -15,11 +16,14 @@ import br.com.mybaby.util.Constantes;
 // BEGIN_INCLUDE(autostart)
 public class SampleBootReceiver extends BroadcastReceiver {
     SampleAlarmReceiver alarm = new SampleAlarmReceiver();
+    private SistemaDAO sistemaDAO;
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED"))
         {
-            alarm.setAlarm(context, Constantes.ALARME_ALERTAS, null);
+        	sistemaDAO = new SistemaDAO(context);
+        	sistemaDAO.update(Constantes.ALARME_ALERTAS_BOOT, Boolean.TRUE.toString());
+            alarm.setAlarm(context);
         }
     }
 }

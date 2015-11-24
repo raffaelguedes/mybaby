@@ -38,12 +38,12 @@
     
     <!-- NOTIFICACAO -->
     <string name="notificacao">MyBaby!</string>
-    <string name="notificacao_mensagem_1">Alerta do MyBaby! Tudo Certo!</string>
+    <string name="notificacao_mensagem_1">Alerta do MyBaby! Tudo Certo!?</string>
     <string name="notificacao_mensagem_2">Tirou o baby! Ufa!</string>
     <string name="notificacao_mensagem_3">Hello. Tem alguém aí!!!</string>
     <string name="notificacao_mensagem_4">Alerta do MyBaby! Tudo Certo!?</string>
     <string name="notificacao_mensagem_5">Estou começando a ficar preocupado!!!</string>
-    <string name="notificacao_mensagem_6">Alerta do MyBaby! Tudo Certo!</string>
+    <string name="notificacao_mensagem_6">Alerta do MyBaby! Tudo Certo!?</string>
     <string name="notificacao_mensagem_7">Será que estou sozinho aqui!?</string>
     <string name="notificacao_mensagem_8">Sem respostas!!! Buááááá!!! Os sms´s serão enviados agora!!!</string>
     <string name="ok">OK</string>
@@ -55,7 +55,7 @@
     <string name="conectado">Conectado</string>
     <string name="conectado_explain">MyBaby! conectado e sincronizado.</string>
     <string name="desconectado">Desligado</string>
-    <string name="desconectado_explain">MyBaby! desconectado. A conexão deverá ocorrer manualmente.</string>
+    <string name="desconectado_explain">MyBaby! desconectado. A conexão poderá ocorrer manualmente ou aguarde o intervalo.</string>
     <string name="aguardando">Aguardando</string>
     <string name="aguardando_explain">MyBaby! Fora do alcance. Mas assim que houver aproximação a conexão será automática.</string>
    

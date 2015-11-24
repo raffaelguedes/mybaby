@@ -16,6 +16,7 @@
 
 package br.com.mybaby;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,14 +39,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
-import br.com.mybaby.alarme.SampleAlarmReceiver;
+import br.com.mybaby.alarme.ConnectAlarmReceiver;
 import br.com.mybaby.dao.SistemaDAO;
 import br.com.mybaby.dialogo.DesconexaoDialogo;
 import br.com.mybaby.dialogo.Dialogo;
+import br.com.mybaby.dialogo.TemCertezaDialogo;
 import br.com.mybaby.preferences.PreferencesActivity;
 import br.com.mybaby.sms.SMSDialogo;
 import br.com.mybaby.util.Constantes;
@@ -80,7 +84,7 @@ public class DeviceControlActivity extends Activity {
     private BluetoothGattCharacteristic mNotifyCharacteristic;
     private SistemaDAO sistemaDAO;
     private SharedPreferences sharedPref;
-    SampleAlarmReceiver alarm = new SampleAlarmReceiver();
+    private ConnectAlarmReceiver connectAlarmReceiver = new ConnectAlarmReceiver();
     
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
@@ -88,23 +92,23 @@ public class DeviceControlActivity extends Activity {
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-            if (!mBluetoothLeService.initialize()) {
-                Log.e(TAG, "Unable to initialize Bluetooth");
-                finish();
-            }
-            
-            // Automatically connects to the device upon successful start-up initialization.
-            mBluetoothLeService.connect(mDeviceAddress);
+    	@Override
+    	public void onServiceConnected(ComponentName componentName, IBinder service) {
+    		mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+    		if (!mBluetoothLeService.initialize()) {
+    			Log.e(TAG, "Unable to initialize Bluetooth");
+    			finish();
+    		}
 
-        }
+    		// Automatically connects to the device upon successful start-up initialization.
+    		mBluetoothLeService.connect(mDeviceAddress);
 
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mBluetoothLeService = null;
-        }
+    	}
+
+    	@Override
+    	public void onServiceDisconnected(ComponentName componentName) {
+    		mBluetoothLeService = null;
+    	}
     };
 
     // Handles various events fired by the Service.
@@ -120,7 +124,7 @@ public class DeviceControlActivity extends Activity {
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
 
             	mConnected = false;
-            	imagemStatus.setImageResource(R.drawable.aguardando);
+            	setImage(R.drawable.aguardando);
                 updateConnectionState(R.string.aguardando);
 
                 invalidateOptionsMenu();
@@ -128,7 +132,7 @@ public class DeviceControlActivity extends Activity {
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action) || BluetoothLeService.ACTION_GATT_DISCONNECTED_DIALOGO.equals(action)) {
             	
             	mConnected = false;
-            	imagemStatus.setImageResource(R.drawable.aguardando);
+            	setImage(R.drawable.aguardando);
                 updateConnectionState(R.string.aguardando);
                 
                 invalidateOptionsMenu();
@@ -140,8 +144,7 @@ public class DeviceControlActivity extends Activity {
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
             	mConnected = true;
             	updateConnectionState(R.string.conectado);
-            	imagemStatus.setImageResource(R.drawable.conectado);
-            	
+            	setImage(R.drawable.conectado);
             	invalidateOptionsMenu();
             	
             	// Show all the supported services and characteristics on the user interface.
@@ -151,8 +154,7 @@ public class DeviceControlActivity extends Activity {
             } else if(BluetoothLeService.ACTION_GATT_DISCONNECTED_INTENCIONAL.equals(action)){
             	mConnected = false;
             	updateConnectionState(R.string.desconectado);
-            	imagemStatus.setImageResource(R.drawable.chorando);
-            	
+            	setImage(R.drawable.chorando);
             	invalidateOptionsMenu();
             }
         }
@@ -160,14 +162,15 @@ public class DeviceControlActivity extends Activity {
       
     public void onOkClickDialogo(){
     	
-    	imagemStatus.setImageResource(R.drawable.aguardando);
-        updateConnectionState(R.string.aguardando);
+//    	setImage(R.drawable.aguardando);
+//        updateConnectionState(R.string.aguardando);
     	
         invalidateOptionsMenu();
         
     	//MUDA PARA FALSE A VARIAVEL DE ENVIO DE ALERTAS
     	Log.d(TAG, "UPDATE > DeviceControlManager > onOkClickDialogo");
     	sistemaDAO.update(Constantes.KEEP_ENVIO_ALERTA, Boolean.FALSE.toString());
+    	sistemaDAO.update(Constantes.ALARME_ALERTAS_BOOT, Boolean.FALSE.toString());
     	
 
     	//MANDA O APP PARA BACKGROUND
@@ -190,17 +193,12 @@ public class DeviceControlActivity extends Activity {
     private void mostrarDialogo(){
     	final DialogFragment newFragment = new Dialogo();
         newFragment.show(DeviceControlActivity.this.getFragmentManager(), Dialogo.EXTRAS_DIALOGO);
-        
-        
-//        final Timer t = new Timer();
-//        t.schedule(new TimerTask() {
-//            public void run() {
-//                newFragment.getDialog().dismiss(); // when the task active then close the dialog
-//                t.cancel(); // also just top the timer thread, otherwise, you may receive a crash report
-//            }
-//        }, TIMEOUT_DIALOGO_DOIS_MINUTOS);
     }
     
+    private void mostrarDialogoTemCerteza(){
+    	final DialogFragment newFragment = new TemCertezaDialogo();
+        newFragment.show(DeviceControlActivity.this.getFragmentManager(), TemCertezaDialogo.EXTRAS_DIALOGO_TEM_CERTEZA);
+    }
     private void mostrarDialogoSMS(){
     	final DialogFragment newFragment = new SMSDialogo();
         newFragment.show(DeviceControlActivity.this.getFragmentManager(), SMSDialogo.EXTRAS_DIALOGO_SMS);
@@ -245,7 +243,7 @@ public class DeviceControlActivity extends Activity {
         mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
         mDataField.setText(R.string.no_data);
     }
-
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	 if (BuildConfig.DEBUG) {
@@ -261,10 +259,16 @@ public class DeviceControlActivity extends Activity {
         
         final Intent intent = getIntent();
         
-        mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
-        mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
         String dispositivoNomeBase = sistemaDAO.getValor(Constantes.DISPOSITIVO_NOME);
         String dispositivoEnderecoBase = sistemaDAO.getValor(Constantes.DISPOSITIVO_ENDERECO);
+        
+        if(intent.getStringExtra(Constantes.ALARME_EXTRA_VAMOS_ACORDAR)!=null){
+        	mDeviceName = dispositivoNomeBase;
+        	mDeviceAddress = dispositivoEnderecoBase;
+        }else{
+        	mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
+        	mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
+        }
         
         imagemStatus = (ImageView) findViewById(R.id.imagemStatus);
         deviceAddress = (TextView) findViewById(R.id.device_address);
@@ -314,13 +318,21 @@ public class DeviceControlActivity extends Activity {
     	sistemaDAO.update(Constantes.KEEP_ENVIO_ALERTA, Boolean.FALSE.toString());
     	
     	updateConnectionState(R.string.aguardando);
-    	imagemStatus.setImageResource(R.drawable.aguardando);
+    	setImage(R.drawable.aguardando);
     	
     	invalidateOptionsMenu();
     }
+	
+	public void onOkClickTemCertezaDialogo(){
+		super.onBackPressed();
+	}
     
     private boolean isNotificacaoAtivo(){
     	return Boolean.parseBoolean(sistemaDAO.getValor(Constantes.NOTIFICACAO_ATIVO));
+    }
+    
+    private boolean isBoot(){
+    	return Boolean.parseBoolean(sistemaDAO.getValor(Constantes.ALARME_ALERTAS_BOOT));
     }
     
     private boolean isSMSEnviado(){
@@ -331,7 +343,7 @@ public class DeviceControlActivity extends Activity {
     protected void onResume() {
         super.onResume();
         
-        if(isNotificacaoAtivo() && !isDesconexaoIntencional() && !isSMSEnviado()){
+        if(isNotificacaoAtivo() && !isDesconexaoIntencional() && !isSMSEnviado() && !isBoot()){
         	onOkClickDialogo();
         }
         
@@ -355,14 +367,18 @@ public class DeviceControlActivity extends Activity {
     	// TODO Auto-generated method stub
     	super.onNewIntent(intent);
 
-    	//ALARME
+    	//ALARME DESCONECTAR
     	if(intent.getStringExtra(Constantes.ALARME_EXTRA_VAMOS_ACORDAR)!=null){
+    		
     		setDesconexaoIntencional(Boolean.FALSE);
-    		mBluetoothLeService.connect(mDeviceAddress);
 
-    		imagemStatus.setImageResource(R.drawable.aguardando);
+    		setImage(R.drawable.aguardando);
     		updateConnectionState(R.string.aguardando);
+    		
+    		//mConnected = mBluetoothLeService.connect(mDeviceAddress);
+
     	}
+    	
     }
 
     @Override
@@ -405,16 +421,17 @@ public class DeviceControlActivity extends Activity {
             	setDesconexaoIntencional(Boolean.FALSE);
                 mBluetoothLeService.connect(mDeviceAddress);
                 
-                imagemStatus.setImageResource(R.drawable.aguardando);
+                setImage(R.drawable.aguardando);
                 updateConnectionState(R.string.aguardando);
                 
                 invalidateOptionsMenu();
                 
-                alarm.cancelAlarm(this);
+                connectAlarmReceiver.cancelAlarm(this);
                 
                 return true;
             case R.id.menu_disconnect:
             	setDesconexaoIntencional(Boolean.TRUE);
+            	
             	mostrarDialogoDesconexao();
                 
                 return true;
@@ -422,19 +439,44 @@ public class DeviceControlActivity extends Activity {
             	//final Intent intent = new Intent(this, DeviceScanActivity.class);
             	//startActivity(intent);
             	//onBackPressed();
+            	
                 return true;
             case R.id.menu_configuracao:
             	final Intent intent = new Intent(this, PreferencesActivity.class);
             	startActivity(intent);
             	return true;
+            	
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    @Override
+    public void onBackPressed() {
+    
+    	mostrarDialogoTemCerteza();
     }
     
     public void desconectar(String tempo){
       mBluetoothLeService.disconnect();
       
-      alarm.setAlarm(this, Constantes.ALARME_CONNECT, tempo);
+      if(sistemaDAO.getValor(Constantes.ALARME_CONNECT_TEMPO)!=null){
+    	  sistemaDAO.update(Constantes.ALARME_CONNECT_TEMPO, tempo);
+      }else{
+    	  sistemaDAO.inserir(Constantes.ALARME_CONNECT_TEMPO, tempo);
+      }
+      
+      if(sistemaDAO.getValor(Constantes.ALARME_CONNECT_HORARIO)!=null){
+    	  sistemaDAO.update(Constantes.ALARME_CONNECT_HORARIO, Util.getDataAtual());
+      }else{
+    	  sistemaDAO.inserir(Constantes.ALARME_CONNECT_HORARIO, Util.getDataAtual());
+      }
+      
+      try {
+		connectAlarmReceiver.setAlarm(this, tempo);
+	} catch (ParseException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
     }
 
     private void updateConnectionState(final int resourceId) {
@@ -452,6 +494,12 @@ public class DeviceControlActivity extends Activity {
             	}
             }
         });
+    }
+    
+    private void setImage(int resource){
+    	imagemStatus.setImageResource(resource);
+    	Animation myFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fadein);
+    	imagemStatus.startAnimation(myFadeInAnimation); //Set animation to your ImageView
     }
 
     private void displayData(String data) {
@@ -522,7 +570,7 @@ public class DeviceControlActivity extends Activity {
         
         return intentFilter;
     }
-
+    
 	public boolean isDesconexaoIntencional() {
 		return isDesconexaoIntencional;
 	}
