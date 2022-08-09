@@ -40,21 +40,21 @@ public class SampleSchedulingService extends IntentService {
     	WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakelockTag");
     	wakeLock.acquire();
     	
-    	//O PROCESSO DE NOTIFICAÇÃO ATÉ O SMS ESTA LEVANDO EM MÉDIA 6 MINUTOS
-    	//ENVIA AS NOTIFICAÇÕES
+    	//O PROCESSO DE NOTIFICAÃ‡ÃƒO ATÃ‰ O SMS ESTA LEVANDO EM MÃ‰DIA 6 MINUTOS
+    	//ENVIA AS NOTIFICAÃ‡Ã•ES
     	if(!notificacao.enviarNotificacao()){
-    		//AGORA FUDEU...NÃO TEVE RESPOSTA EM NENHUMA DAS NOTIFICAÇÕES
-    		Log.i(TAG, "Sem resposta aos envios de Notificação.");
-    		Log.i(TAG, "Os SMS serão enviados.");
+    		//AGORA FUDEU...NÃƒO TEVE RESPOSTA EM NENHUMA DAS NOTIFICAÃ‡Ã•ES
+    		Log.i(TAG, "Sem resposta aos envios de NotificaÃ§Ã£o.");
+    		Log.i(TAG, "Os SMS serÃ£o enviados.");
 
     		if(!sms.enviarSMS()){
-    			//AGORA FUDEU EM DOBRO...NÃO TEVE RESPOSTA EM NENHUMA DAS NOTIFICAÇÕES E DOS SMS´S
+    			//AGORA FUDEU EM DOBRO...NÃƒO TEVE RESPOSTA EM NENHUMA DAS NOTIFICAÃ‡Ã•ES E DOS SMSÂ´S
     			Log.i(TAG, "Sem resposta aos envios de SMS.");
     			
     			//ENVIANDO OS EMAILS
     	    	if(isOnline()){
     	    		Log.i(TAG, "Enviando emails.");
-    	    		EmailService emailService = new EmailService("raffa3lgu3d3s@gmail.com", "HardCore1983", this);
+    	    		EmailService emailService = new EmailService("", "", this);
     	    		try {
     	    			emailService.sendMail();
     	    		} catch (Exception e) {
